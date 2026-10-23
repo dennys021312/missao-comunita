@@ -1,0 +1,2656 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Missão Comunitá — Guardiões da Cultura (2D Castlevania & RPG)</title>
+  <style>
+    :root {
+      --amarelo: #FFC700;
+      --laranja: #FF6D00;
+      --roxo: #7B3F8C;
+      --roxo-escuro: #1B0726;
+      --rosa: #F06292;
+      --creme: #FFF8E7;
+      --preto: #14081C;
+      --verde: #2ECC71;
+      --azul: #00E5FF;
+      --vermelho: #E74C3C;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at center, #4A1564 0%, #12041A 100%);
+      color: var(--preto);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+      touch-action: none;
+      padding: 6px;
+    }
+
+    #game-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 1040px;
+      aspect-ratio: 16 / 9;
+      background: #14071e;
+      border: 4px solid var(--amarelo);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), inset 0 0 30px rgba(255, 199, 0, 0.15);
+    }
+
+    #gameCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* HUD Superior Estilo Castlevania SotN + RPG */
+    #hud {
+      position: absolute;
+      top: 8px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      background: linear-gradient(90deg, rgba(20, 6, 30, 0.92), rgba(45, 14, 65, 0.88), rgba(20, 6, 30, 0.92));
+      backdrop-filter: blur(6px);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 10px;
+      border: 2px solid var(--amarelo);
+      font-size: clamp(10px, 1.15vw, 12.5px);
+      font-weight: 800;
+      z-index: 10;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+    }
+
+    .hud-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .hud-item span {
+      color: var(--amarelo);
+    }
+
+    .bar-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(0,0,0,0.45);
+      padding: 2px 6px;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 199, 0, 0.35);
+    }
+
+    .bar-bg {
+      width: 56px;
+      height: 8px;
+      background: #222;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill-hp {
+      height: 100%;
+      background: linear-gradient(90deg, #c0392b, #ff5252, #2ecc71);
+      width: 100%;
+      transition: width 0.2s;
+    }
+
+    .bar-fill-mp {
+      height: 100%;
+      background: linear-gradient(90deg, #0088cc, #00E5FF);
+      width: 100%;
+      transition: width 0.2s;
+    }
+
+    .bar-fill-xp {
+      height: 100%;
+      background: linear-gradient(90deg, #FF6D00, #FFC700);
+      width: 0%;
+      transition: width 0.2s;
+    }
+
+    /* Banner de Missão / Puzzle Ativo */
+    #quest-banner {
+      position: absolute;
+      top: 48px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(27, 7, 38, 0.92);
+      border: 1.5px solid var(--azul);
+      color: #fff;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: clamp(10px, 1.15vw, 12px);
+      font-weight: 700;
+      z-index: 9;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      white-space: nowrap;
+    }
+
+    /* Notificação Flutuante RPG */
+    #floating-banner {
+      position: absolute;
+      top: 82px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, #FFD600, #FF6D00);
+      color: #1A1A1A;
+      font-weight: 900;
+      padding: 6px 18px;
+      border-radius: 30px;
+      font-size: 13px;
+      z-index: 20;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.65);
+      pointer-events: none;
+    }
+
+    /* Telas de Overlay */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, rgba(35, 10, 52, 0.96) 0%, rgba(15, 4, 24, 0.98) 100%);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 12px 16px;
+      text-align: center;
+      z-index: 30;
+      overflow-y: auto;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .badge-logo {
+      background: linear-gradient(90deg, var(--amarelo), #FF9100);
+      color: var(--preto);
+      font-weight: 900;
+      padding: 4px 14px;
+      border-radius: 30px;
+      font-size: 11px;
+      letter-spacing: 0.8px;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .overlay h1 {
+      color: var(--amarelo);
+      font-size: clamp(18px, 2.5vw, 25px);
+      margin-bottom: 4px;
+      text-shadow: 0 3px 10px rgba(0,0,0,0.7);
+    }
+
+    .overlay p.subtitle {
+      max-width: 740px;
+      font-size: clamp(11px, 1.3vw, 13px);
+      line-height: 1.35;
+      margin-bottom: 8px;
+      color: var(--creme);
+    }
+
+    .player-form {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 4px;
+      width: 100%;
+      max-width: 580px;
+    }
+
+    .input-field {
+      padding: 7px 12px;
+      border-radius: 8px;
+      border: 2px solid var(--amarelo);
+      font-size: 13px;
+      flex: 1;
+      min-width: 160px;
+      text-align: center;
+      font-weight: bold;
+      color: var(--preto);
+      background: #fff;
+    }
+
+    .form-error {
+      color: #FF8A80;
+      font-size: 12px;
+      font-weight: 800;
+      min-height: 16px;
+      margin-bottom: 4px;
+    }
+
+    .char-section-title {
+      font-size: 11.5px;
+      font-weight: 800;
+      color: var(--amarelo);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 6px;
+    }
+
+    .char-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      width: 100%;
+      max-width: 740px;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 700px) {
+      .char-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .char-card {
+      background: radial-gradient(circle at top, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+      border: 2px solid rgba(255, 199, 0, 0.4);
+      border-radius: 12px;
+      padding: 6px 4px;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .char-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--amarelo);
+    }
+
+    .char-card.selected {
+      background: linear-gradient(180deg, rgba(255, 199, 0, 0.35), rgba(255, 109, 0, 0.45));
+      border: 3px solid var(--amarelo);
+      box-shadow: 0 0 18px rgba(255, 199, 0, 0.65);
+      transform: scale(1.04);
+    }
+
+    .char-card canvas {
+      width: 56px;
+      height: 64px;
+      margin-bottom: 2px;
+    }
+
+    .char-name {
+      font-size: 11px;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .char-role {
+      font-size: 9px;
+      color: #FFE082;
+    }
+
+    .char-stat {
+      font-size: 8.5px;
+      color: #80D8FF;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .btn {
+      background: linear-gradient(180deg, #FFD600 0%, #FFAB00 100%);
+      color: var(--preto);
+      border: none;
+      padding: 9px 18px;
+      font-size: 13.5px;
+      font-weight: 800;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.15s, filter 0.15s;
+      box-shadow: 0 4px 0 #b37400;
+    }
+
+    .btn-secondary {
+      background: linear-gradient(180deg, #9C27B0 0%, #6A1B9A 100%);
+      color: #fff;
+      box-shadow: 0 4px 0 #4A148C;
+      border: 1px solid var(--amarelo);
+    }
+
+    .btn-menu {
+      background: linear-gradient(180deg, #E74C3C 0%, #C0392B 100%);
+      color: #fff;
+      box-shadow: 0 4px 0 #962D22;
+      border: 1px solid var(--amarelo);
+    }
+
+    .btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-2px);
+    }
+
+    .btn:active {
+      transform: translateY(2px);
+    }
+
+    /* Modal de RPG / Grimório do Saber */
+    .card-box {
+      background: var(--creme);
+      color: var(--preto);
+      border: 4px solid var(--amarelo);
+      border-radius: 14px;
+      padding: 16px;
+      max-width: 670px;
+      width: 96%;
+      text-align: left;
+      box-shadow: 0 14px 35px rgba(0,0,0,0.75);
+      margin: auto;
+    }
+
+    .rpg-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(90deg, #3A1052, #6A1B9A);
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border-left: 5px solid var(--amarelo);
+    }
+
+    .rpg-header h2 {
+      color: var(--amarelo);
+      font-size: clamp(14px, 1.9vw, 18px);
+      margin: 0;
+    }
+
+    .card-box p {
+      color: var(--preto);
+      font-size: clamp(12px, 1.5vw, 13.5px);
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    .quiz-option {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: #fff;
+      color: var(--preto);
+      border: 2px solid var(--roxo);
+      padding: 9px 12px;
+      margin: 6px 0;
+      border-radius: 8px;
+      font-size: clamp(11.5px, 1.45vw, 13.5px);
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .quiz-option:hover:not(:disabled) {
+      background: #f3e5f5;
+      border-color: var(--laranja);
+      transform: translateX(4px);
+    }
+
+    .feedback-msg {
+      margin-top: 8px;
+      font-weight: bold;
+      font-size: 12.5px;
+      padding: 8px;
+      border-radius: 8px;
+    }
+
+    .end-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: 100%;
+      max-width: 780px;
+      margin: 6px 0;
+    }
+
+    @media (max-width: 680px) {
+      .end-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .certificate-box, .ranking-box {
+      background: var(--creme);
+      color: var(--preto);
+      border: 3px solid var(--amarelo);
+      border-radius: 12px;
+      padding: 10px 12px;
+      text-align: left;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+    }
+
+    .certificate-box h3, .ranking-box h3 {
+      color: var(--roxo);
+      font-size: 14px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .ranking-list {
+      list-style: none;
+      max-height: 155px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+
+    .ranking-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 8px;
+      border-bottom: 1px solid #e0d4b8;
+      border-radius: 6px;
+    }
+
+    .ranking-item.highlight {
+      background: #FFF176;
+      font-weight: 900;
+      border: 1px solid var(--laranja);
+    }
+
+    .rank-pos {
+      font-weight: 900;
+      color: var(--roxo);
+      width: 24px;
+    }
+
+    .rank-name {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding-right: 6px;
+    }
+
+    .rank-score {
+      font-weight: 900;
+      color: var(--laranja);
+    }
+
+    .toast-copy {
+      background: var(--verde);
+      color: #fff;
+      font-size: 12px;
+      font-weight: bold;
+      padding: 5px 12px;
+      border-radius: 20px;
+      margin-top: 4px;
+      display: inline-block;
+    }
+
+    /* Controles Touch Castlevania 2D (Esquerda/Direita + Chicote + Magia + Pulo) */
+    #touch-controls {
+      position: absolute;
+      bottom: 10px;
+      left: 12px;
+      right: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      z-index: 15;
+      pointer-events: none;
+    }
+
+    .move-group, .action-group {
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+      align-items: center;
+    }
+
+    .touch-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      background: rgba(255, 199, 0, 0.85);
+      border: 2.5px solid var(--preto);
+      color: var(--preto);
+      font-size: 20px;
+      font-weight: 900;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.55);
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .touch-btn small {
+      font-size: 9px;
+      margin-top: 2px;
+      font-weight: 900;
+    }
+
+    .touch-btn.whip-btn {
+      background: linear-gradient(180deg, #FF9100, #FF3D00);
+      color: #fff;
+      border-color: #FFF;
+    }
+
+    .touch-btn.magic-btn {
+      background: linear-gradient(180deg, #00E5FF, #0077C2);
+      color: #fff;
+      border-color: #FFF;
+    }
+
+    .touch-btn:active {
+      transform: scale(0.92);
+      filter: brightness(1.15);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="game-wrapper">
+    <!-- HUD Estilo Castlevania RPG -->
+    <div id="hud">
+      <div class="hud-group">
+        <div class="hud-item">🦸 <span id="hud-hero">Super Nina</span></div>
+        <div class="hud-item">Nv.<span id="hud-lvl-rpg">1</span></div>
+        <div class="bar-wrap" title="Pontos de Vida (HP)">
+          ❤️HP <div class="bar-bg"><div class="bar-fill-hp" id="hud-hp-bar"></div></div>
+        </div>
+        <div class="bar-wrap" title="Energia de Empatia (MP para Magia)">
+          💧MP <div class="bar-bg"><div class="bar-fill-mp" id="hud-mp-bar"></div></div>
+        </div>
+        <div class="bar-wrap" title="Experiência RPG (XP)">
+          ⚡XP <div class="bar-bg"><div class="bar-fill-xp" id="hud-xp-bar"></div></div>
+        </div>
+      </div>
+
+      <div class="hud-group">
+        <div class="hud-item">Castelo: <span id="hud-level">1/4</span></div>
+        <div class="hud-item">Grimórios (?): <span id="hud-blocks">0/3</span></div>
+        <div class="hud-item">Puzzle: <span id="hud-puzzle" style="color:#80D8FF;">Trancado</span></div>
+        <div class="hud-item">Score: <span id="hud-score">0</span> 🏆 <span id="hud-combo">x1</span></div>
+        <div class="hud-item">🐾 <span id="hud-mount">A pé</span></div>
+        <div class="hud-item">⏱️ <span id="hud-time">00:00</span></div>
+        <button class="btn btn-menu" id="menu-btn" style="padding: 3px 9px; font-size: 11px;">🏠 Menu</button>
+      </div>
+    </div>
+
+    <!-- Banner de Missão / Puzzle Castlevania -->
+    <div id="quest-banner">
+      🏰 <span id="quest-text">Suba as Escadas, desvie dos Espinhos e Pêndulos, colete os Morangos e abra os 3 Grimórios (?)!</span>
+    </div>
+
+    <!-- Notificação Temporária -->
+    <div id="floating-banner" class="hidden">🌟 LEVEL UP!</div>
+
+    <!-- Canvas 2D Castlevania Action-RPG -->
+    <canvas id="gameCanvas" width="960" height="540"></canvas>
+
+    <!-- Controles Touch/Mobile e PC -->
+    <div id="touch-controls">
+      <div class="move-group">
+        <button class="touch-btn" id="btn-left" title="Esquerda (A / Seta)">◀<small>ESQ</small></button>
+        <button class="touch-btn" id="btn-right" title="Direita (D / Seta)">▶<small>DIR</small></button>
+      </div>
+      <div class="action-group">
+        <button class="touch-btn whip-btn" id="btn-attack" title="Tecla J ou Z: Chicote da Empatia">⚔️<small>CHICOTE</small></button>
+        <button class="touch-btn magic-btn" id="btn-skill" title="Tecla K ou E: Cruz/Onda de Luz">✨<small>MAGIA</small></button>
+        <button class="touch-btn" id="btn-jump" title="Espaço ou W: Pular">⏫<small>PULAR</small></button>
+      </div>
+    </div>
+
+    <!-- Tela Inicial com Cadastro e Seleção de Herói -->
+    <div id="start-screen" class="overlay">
+      <div class="badge-logo">❃ REDE COMUNITÁ • 30 ANOS • PIXEL-ART SKY ISLANDS RPG</div>
+      <h1>Missão Comunitá: Ilhas do Conhecimento</h1>
+      <p class="subtitle">
+        Explore as <strong>Ilhas Flutuantes em Pixel Art</strong>! Suba <strong>Escadas</strong>, desvie de <strong>Espinhos e Machados Pêndulo</strong>, colete <strong>Morangos de Energia</strong>, use o <strong>Chicote (J/Z)</strong> e responda aos 3 Grimórios (?) para hastear a <strong>Bandeira 30 Anos</strong>!
+      </p>
+
+      <div class="player-form">
+        <input type="text" id="player-name-input" class="input-field" placeholder="Seu Nome Completo *" maxlength="28" />
+        <input type="text" id="player-unit-input" class="input-field" placeholder="Unidade / Setor (Ex: Sede / RH) *" maxlength="24" />
+      </div>
+      <div id="form-error" class="form-error"></div>
+
+      <div class="char-section-title">🦸 Escolha seu Guardião 30 Anos (Atributos RPG):</div>
+      <div class="char-grid" id="char-grid"></div>
+
+      <div class="btn-row">
+        <button class="btn" id="start-btn">⚔️ Entrar na Cidadela (Jogar)</button>
+        <button class="btn btn-secondary" id="open-ranking-btn">🏆 Ver Hall da Fama</button>
+      </div>
+    </div>
+
+    <!-- Modal de Ranking -->
+    <div id="ranking-modal" class="overlay hidden">
+      <div class="card-box" style="max-width: 540px; text-align: center;">
+        <div class="rpg-header">
+          <h2>🏆 Hall da Fama — Rede Comunitá 30 Anos</h2>
+          <span>Top 10</span>
+        </div>
+        <p style="text-align: center; font-size: 12px;">Os maiores Guardiões da Cidadela da Cultura, Ética e Inclusão!</p>
+        <ul class="ranking-list" id="modal-ranking-list" style="max-height: 230px; text-align: left; margin-bottom: 12px;"></ul>
+        <button class="btn" id="close-ranking-btn">Voltar ao Menu</button>
+      </div>
+    </div>
+
+    <!-- Modal de Grimório RPG / Quiz Educativo -->
+    <div id="quiz-modal" class="overlay hidden">
+      <div class="card-box">
+        <div class="rpg-header">
+          <h2 id="quiz-title">📖 Grimório do Saber Comunitá</h2>
+          <span id="quiz-badge" style="background:var(--amarelo); color:#000; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:900;">+150 XP</span>
+        </div>
+        <p id="quiz-knowledge" style="background:#FFF3D1; padding:10px; border-left:4px solid var(--laranja); border-radius:6px; font-weight:600;"></p>
+        <p><strong id="quiz-question" style="font-size:14.5px; color:var(--roxo-escuro);"></strong></p>
+        <div id="quiz-options"></div>
+        <div id="quiz-feedback" class="feedback-msg hidden"></div>
+        <div style="text-align: right; margin-top: 8px;">
+          <button class="btn hidden" id="quiz-continue-btn">Continuar Missão ▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tela de Conclusão / Certificado -->
+    <div id="end-screen" class="overlay hidden">
+      <div class="badge-logo">❃ CIDADELA LIBERTADA • 30 ANOS REDE COMUNITÁ</div>
+      <h1>Placar Final & Certificado RPG</h1>
+
+      <div class="end-grid">
+        <div class="certificate-box">
+          <h3><span>🎖️ Certificado Guardião</span> <span id="cert-hero-badge" style="color: var(--laranja);"></span></h3>
+          <p style="font-size: 12px; margin-bottom: 4px;">
+            Agente: <strong id="cert-name" style="color: var(--roxo);">Colaborador(a)</strong>
+          </p>
+          <p style="font-size: 11.5px; background: #fff; padding: 8px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 6px;">
+            ⭐ <strong>Score Total:</strong> <span id="final-score" style="color: var(--laranja); font-size: 16px; font-weight: 900;">0</span> pts<br>
+            ⚡ <strong>Nível RPG Alcançado:</strong> Nv. <span id="final-rpg-level">1</span><br>
+            ⏱️ <strong>Tempo Total:</strong> <span id="final-time">00:00</span> (Bônus: +<span id="final-time-bonus">0</span>)<br>
+            🎯 <strong>Acertos de 1ª:</strong> <span id="final-perfect">0/12</span> | 🧩 <strong>Puzzles:</strong> 4/4
+          </p>
+          <p style="font-size: 11px; color: #4A235A; line-height: 1.35;">
+            ✔ Cultura e Propósito &nbsp;|&nbsp; ✔ Código de Ética<br>
+            ✔ Inclusão PcD &nbsp;|&nbsp; ✔ Prevenção ao Assédio
+          </p>
+        </div>
+
+        <div class="ranking-box">
+          <h3><span>🏆 Ranking Geral Comunitá</span> <span style="font-size: 11px; color: var(--laranja);">Top 10</span></h3>
+          <ul class="ranking-list" id="end-ranking-list"></ul>
+        </div>
+      </div>
+
+      <div id="copy-toast" class="toast-copy hidden">✅ Placar copiado para desafiar sua equipe no WhatsApp!</div>
+
+      <div class="btn-row">
+        <button class="btn" id="share-score-btn">📲 Copiar Meu Score p/ WhatsApp</button>
+        <button class="btn btn-secondary" id="restart-btn">🔄 Jogar Novamente</button>
+        <button class="btn btn-menu" id="end-menu-btn">🏠 Voltar ao Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // =========================================================================
+    // 1. EFEITOS SONOROS SINTETIZADOS (WEB AUDIO API)
+    // =========================================================================
+    let audioCtx = null;
+    function playSound(type) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        const now = audioCtx.currentTime;
+
+        if (type === 'jump') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(240, now);
+          osc.frequency.exponentialRampToValueAtTime(520, now + 0.14);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        } else if (type === 'whip') {
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(420, now);
+          osc.frequency.exponentialRampToValueAtTime(110, now + 0.12);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.13);
+          osc.start(now);
+          osc.stop(now + 0.13);
+        } else if (type === 'magic') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(520, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.22);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.23);
+          osc.start(now);
+          osc.stop(now + 0.23);
+        } else if (type === 'candle' || type === 'heart') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587, now);
+          osc.frequency.setValueAtTime(880, now + 0.07);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.18);
+          osc.start(now);
+          osc.stop(now + 0.18);
+        } else if (type === 'powerup' || type === 'puzzle') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(659, now + 0.08);
+          osc.frequency.setValueAtTime(880, now + 0.16);
+          gain.gain.setValueAtTime(0.16, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.32);
+          osc.start(now);
+          osc.stop(now + 0.32);
+        } else if (type === 'hit') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.linearRampToValueAtTime(75, now + 0.2);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        }
+      } catch (e) {}
+    }
+
+    // =========================================================================
+    // 2. HERÓIS 30 ANOS REDE COMUNITÁ (SELEÇÃO E SPRITES)
+    // =========================================================================
+    const CHARACTERS = [
+      { id: 'nina', name: 'Super Nina', role: 'Guardiã da Empatia', stat: 'Alcance Chicote +15%', skin: '#F4A978', hair: '#1A1110', helmet: true, whipColor: '#FF6D00' },
+      { id: 'leo', name: 'Super Léo', role: 'Agente do Time', stat: 'Velocidade +15%', skin: '#F5B588', hair: '#3B2219', helmet: true, whipColor: '#00E5FF' },
+      { id: 'kauan', name: 'Super Kauan', role: 'Líder Protagonista', stat: 'Dano Chicote +20%', skin: '#7B4628', hair: '#1C1311', helmet: false, whipColor: '#FFC700' },
+      { id: 'bia', name: 'Super Bia', role: 'Voz da Inclusão', stat: 'Regenera MP', skin: '#E69F73', hair: '#141414', helmet: false, whipColor: '#F06292' },
+      { id: 'clara', name: 'Super Clara', role: 'Mestra da Ética', stat: 'Defesa +25%', skin: '#F5CBA7', hair: '#D7DBDD', helmet: false, whipColor: '#B388FF' },
+      { id: 'jorge', name: 'Super Jorge', role: 'Guardião Sênior', stat: 'XP Ganho +25%', skin: '#8D5524', hair: '#BDC3C7', helmet: false, whipColor: '#2ECC71' }
+    ];
+
+    let selectedChar = CHARACTERS[0];
+
+    function drawHeroMiniCanvas(c, ch) {
+      const g = c.getContext('2d');
+      g.clearRect(0, 0, c.width, c.height);
+      const cx = c.width / 2;
+
+      // Capa Laranja 30 anos
+      g.fillStyle = '#FF6D00';
+      g.beginPath();
+      g.moveTo(cx - 12, 26);
+      g.lineTo(cx - 20, 56);
+      g.lineTo(cx + 20, 56);
+      g.lineTo(cx + 12, 26);
+      g.closePath();
+      g.fill();
+
+      // Traje Branco 30 Anos
+      g.fillStyle = '#FFFFFF';
+      g.fillRect(cx - 10, 28, 20, 22);
+
+      // Cinto Roxo e Fivela Dourada
+      g.fillStyle = '#7B3F8C';
+      g.fillRect(cx - 10, 42, 20, 4);
+      g.fillStyle = '#FFC700';
+      g.beginPath();
+      g.arc(cx, 44, 3.5, 0, Math.PI * 2);
+      g.fill();
+
+      // Cabeça
+      g.fillStyle = ch.skin;
+      g.beginPath();
+      g.arc(cx, 18, 11, 0, Math.PI * 2);
+      g.fill();
+
+      // Capacete ou Cabelo
+      if (ch.helmet) {
+        g.fillStyle = '#FFFFFF';
+        g.beginPath();
+        g.arc(cx, 16, 12, Math.PI, 0);
+        g.fill();
+        g.strokeStyle = '#7B3F8C';
+        g.lineWidth = 2;
+        g.stroke();
+      } else {
+        g.fillStyle = ch.hair;
+        g.beginPath();
+        g.arc(cx, 15, 11.5, Math.PI, 0);
+        g.fill();
+      }
+
+      // Olhos
+      g.fillStyle = '#14081C';
+      g.fillRect(cx - 5, 16, 3, 4);
+      g.fillRect(cx + 2, 16, 3, 4);
+    }
+
+    function renderCharSelector() {
+      const grid = document.getElementById('char-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      CHARACTERS.forEach(ch => {
+        const card = document.createElement('div');
+        card.className = 'char-card' + (ch.id === selectedChar.id ? ' selected' : '');
+        const cv = document.createElement('canvas');
+        cv.width = 56;
+        cv.height = 64;
+        drawHeroMiniCanvas(cv, ch);
+
+        const nm = document.createElement('div');
+        nm.className = 'char-name';
+        nm.textContent = ch.name;
+
+        const rl = document.createElement('div');
+        rl.className = 'char-role';
+        rl.textContent = ch.role;
+
+        const st = document.createElement('div');
+        st.className = 'char-stat';
+        st.textContent = ch.stat;
+
+        card.append(cv, nm, rl, st);
+        card.onclick = () => {
+          selectedChar = ch;
+          renderCharSelector();
+        };
+        grid.appendChild(card);
+      });
+    }
+
+    // =========================================================================
+    // 3. BANCO DE DADOS DAS 4 FASES (BASEADO NAS CARTILHAS DA REDE COMUNITÁ)
+    // =========================================================================
+    const LEVELS = [
+      {
+        name: "1/4 - Cultura e Propósito",
+        puzzleQuest: "Fase 1 (Cultura): Suba as escadas, ative a Ponte (Esfera ou Cristal), abra os 3 Grimórios (?) e chegue à Bandeira 30 Anos!",
+        enemies: [
+          { x: 470, y: 397, type: 'walker', label: 'Fofoca', hp: 60, color: '#E74C3C' },
+          { x: 890, y: 185, type: 'flyer', label: 'Desunião', hp: 50, color: '#9B59B6' },
+          { x: 1520, y: 397, type: 'walker', label: 'Omissão', hp: 70, color: '#E67E22' },
+          { x: 2210, y: 369, type: 'boss', label: 'Chefe: Individualismo', hp: 160, color: '#C0392B' }
+        ],
+        questions: [
+          {
+            pillar: "Pilar 1 e 2: Paixão por Transformar Vidas & Somos um Só Time",
+            knowledge: "Há quase 30 anos promovemos autonomia e protagonismo. No nosso time não há espaço para competição interna: o sucesso de um(a) é o sucesso de todos(as)!",
+            q: "Segundo a Cartilha de Cultura e Propósito, como atuamos em equipe na Rede Comunitá?",
+            options: [
+              "Estimulando a competição interna para ver quem se destaca sozinho.",
+              "Somos um só time: somamos habilidades, discutimos abertamente e pedimos ajuda quando necessário.",
+              "Cada área trabalha isolada sem compartilhar aprendizados."
+            ],
+            correct: 1
+          },
+          {
+            pillar: "Pilar 3: Nos Comunicamos com Transparência e Empatia",
+            knowledge: "Falamos com o coração aberto, ouvimos atentamente e oferecemos feedbacks construtivos e respeitosos, combatendo ativamente a fofoca.",
+            q: "Qual atitude fortalece nossa comunicação transparente e empática?",
+            options: [
+              "Combater a fofoca e manter diálogo franco, respeitoso e focado em soluções.",
+              "Evitar conversas francas e espalhar boatos nos corredores.",
+              "Omitir informações importantes da equipe."
+            ],
+            correct: 0
+          },
+          {
+            pillar: "Pilar 4 e 5: Pessoas Incríveis e Inquietas & Atitude Responsável",
+            knowledge: "Tomamos decisões baseadas em dados e fatos. Fazer o que é certo é um compromisso, zelando pelos recursos humanos e materiais.",
+            q: "O que significa ter 'Atitude Responsável' no cotidiano da Rede Comunitá?",
+            options: [
+              "Cumprir apenas o básico sem olhar o impacto futuro.",
+              "Agir com integridade, zelando pelos espaços, recursos, nosso time e famílias atendidas.",
+              "Tomar decisões por impulso sem avaliar fatos."
+            ],
+            correct: 1
+          }
+        ]
+      },
+      {
+        name: "2/4 - Código de Conduta Ética",
+        puzzleQuest: "Fase 2 (Ética): Desvie dos Machados Pêndulo, ative a Ponte da Integridade e responda aos 3 Grimórios (?)!",
+        enemies: [
+          { x: 480, y: 397, type: 'walker', label: 'Suborno', hp: 75, color: '#8E44AD' },
+          { x: 920, y: 180, type: 'flyer', label: 'Quebra de Sigilo', hp: 65, color: '#D35400' },
+          { x: 1540, y: 397, type: 'walker', label: 'Uso Indevido', hp: 80, color: '#C0392B' },
+          { x: 2210, y: 369, type: 'boss', label: 'Chefe: Conflito de Interesses', hp: 190, color: '#8E1B1B' }
+        ],
+        questions: [
+          {
+            pillar: "Código de Ética: Patrimônio e Conflito de Interesses",
+            knowledge: "Os bens da entidade destinam-se ao trabalho. Para evitar conflito de interesses, não contratamos parentes de colaboradores na mesma unidade.",
+            q: "Sobre o uso de bens da instituição e contratação de parentes, o Código de Ética define que:",
+            options: [
+              "É permitido levar equipamentos para uso pessoal sem autorização.",
+              "Não contratamos parentes na mesma unidade e a retirada de bens a serviço exige autorização do superior.",
+              "Parentes podem trabalhar juntos no mesmo setor sem restrições."
+            ],
+            correct: 1
+          },
+          {
+            pillar: "Código de Ética: Sigilo e Confidencialidade",
+            knowledge: "Dados cadastrais de usuários, atendimentos, projetos e relatórios são estritamente confidenciais, mesmo após o desligamento.",
+            q: "Quais informações devem ser mantidas em absoluto sigilo pelos colaboradores?",
+            options: [
+              "Apenas informações contábeis durante o contrato.",
+              "Dados de atendimentos, usuários, projetos e documentos internos, inclusive após o desligamento.",
+              "Nenhuma, pois tudo pode ser divulgado em redes pessoais."
+            ],
+            correct: 1
+          },
+          {
+            pillar: "Código de Ética: Benefícios Pessoais e Presentes",
+            knowledge: "Colaboradores não podem aceitar dinheiro, viagens ou presentes de valor de fornecedores. Apenas itens simbólicos (como agendas e calendários) são permitidos.",
+            q: "Se um fornecedor enviar um presente de valor à casa do colaborador e não for possível recusar no ato, o que fazer?",
+            options: [
+              "Guardar para uso pessoal.",
+              "Entregar obrigatoriamente ao Departamento Administrativo da Rede Comunitá para avaliação.",
+              "Sortear informalmente sem comunicar a gestão."
+            ],
+            correct: 1
+          }
+        ]
+      },
+      {
+        name: "3/4 - Inclusão de PcD",
+        puzzleQuest: "Fase 3 (Inclusão PcD): Supere as barreiras nas Ilhas Flutuantes, colete os Morangos e destrave os 3 Grimórios (?)!",
+        enemies: [
+          { x: 470, y: 397, type: 'walker', label: 'Capacitismo', hp: 85, color: '#E74C3C' },
+          { x: 910, y: 175, type: 'flyer', label: 'Preconceito', hp: 70, color: '#9B59B6' },
+          { x: 1530, y: 397, type: 'walker', label: 'Segregação', hp: 90, color: '#D35400' },
+          { x: 2210, y: 369, type: 'boss', label: 'Chefe: Barreira Atitudinal', hp: 220, color: '#AD1457' }
+        ],
+        questions: [
+          {
+            pillar: "Cartilha de Inclusão: Lei de Cotas (Lei nº 8.213/91)",
+            knowledge: "Empresas com 100 ou mais empregados devem preencher de 2% a 5% dos seus cargos com beneficiários reabilitados ou Pessoas com Deficiência habilitadas.",
+            q: "Além de cumprir a Lei de Cotas (2% a 5%), o que significa a verdadeira inclusão para a Rede Comunitá?",
+            options: [
+              "Apenas contratar para evitar multas, mantendo os profissionais isolados.",
+              "Oferecer condições, acessibilidade e tecnologias assistivas para desenvolver talentos, focando na capacidade da pessoa.",
+              "Tratar o profissional com deficiência como criança."
+            ],
+            correct: 1
+          },
+          {
+            pillar: "Cartilha de Inclusão: Linguagem Apropriada",
+            knowledge: "A Convenção da ONU define a expressão correta que enfatiza o indivíduo antes de sua condição, eliminando termos pejorativos.",
+            q: "Qual é a expressão correta recomendada pela Cartilha de Inclusão?",
+            options: [
+              "Portador de necessidades especiais.",
+              "Pessoa com Deficiência (PcD), pois enfatiza o indivíduo e não a sua limitação.",
+              "Pessoa inválida ou especial."
+            ],
+            correct: 1
+          },
+          {
+            pillar: "Cartilha de Inclusão: Respeito ao Espaço Corporal",
+            knowledge: "A cadeira de rodas, muletas, bengalas e cães-guia são parte do espaço corporal da pessoa e só devem ser tocados com permissão.",
+            q: "Ao interagir com uma Pessoa com Deficiência no trabalho, como devemos agir?",
+            options: [
+              "Empurrar a cadeira de rodas ou tocar na bengala sem perguntar.",
+              "Agir com naturalidade, perguntar se quer ajuda e aguardar a resposta, respeitando seu espaço corporal.",
+              "Tomar decisões por ela sem consultá-la."
+            ],
+            correct: 1
+          }
+        ]
+      },
+      {
+        name: "4/4 - Prevenção ao Assédio",
+        puzzleQuest: "Fase Final (Combate ao Assédio): Derrote os monstros da humilhação, abra os 3 Grimórios (?) e liberte a Cidadela!",
+        enemies: [
+          { x: 470, y: 397, type: 'walker', label: 'Humilhação', hp: 95, color: '#C0392B' },
+          { x: 910, y: 175, type: 'flyer', label: 'Intimidação', hp: 80, color: '#8E44AD' },
+          { x: 1530, y: 397, type: 'walker', label: 'Boato Hostil', hp: 95, color: '#D35400' },
+          { x: 2210, y: 369, type: 'boss', label: 'Chefe: Assédio & Abuso', hp: 250, color: '#B71C1C' }
+        ],
+        questions: [
+          {
+            pillar: "Prevenção ao Assédio: O que é e o que NÃO é Assédio Moral",
+            knowledge: "Assédio moral exige repetição e prolongamento de condutas humilhantes. Já cobranças normais de metas e ponto eletrônico não são assédio.",
+            q: "Qual das situações abaixo configura Assédio Moral no trabalho?",
+            options: [
+              "Uso de ponto eletrônico e avaliações normais de desempenho.",
+              "Expor o colaborador de forma repetitiva e prolongada a humilhações, isolamento, gritos ou boatos ofensivos.",
+              "Um feedback pontual e respeitoso sobre uma atividade."
+            ],
+            correct: 1
+          },
+          {
+            pillar: "Prevenção ao Assédio: Diferença entre Assédio Moral e Sexual",
+            knowledge: "Diferente do assédio moral (que exige repetição), no assédio sexual um único ato indesejado de natureza sexual basta para caracterizá-lo (Art. 216-A do Código Penal).",
+            q: "Sobre o Assédio Sexual no ambiente de trabalho, é correto afirmar que:",
+            options: [
+              "Exige dezenas de repetições para poder ser denunciado.",
+              "Basta um único ato indesejado que restrinja a liberdade sexual (por chantagem ou intimidação), e a culpa nunca é da vítima.",
+              "Só ocorre se houver agressão física dentro da unidade."
+            ],
+            correct: 1
+          },
+          {
+            pillar: "Canais Oficiais e Sigilosos de Denúncia",
+            knowledge: "Vítimas e testemunhas devem anotar detalhes (data, hora, local, testemunhas), apoiar a vítima e acionar os canais oficiais com garantia de sigilo.",
+            q: "Quais são os canais oficiais da Rede Comunitá para denunciar assédio com confidencialidade?",
+            options: [
+              "Ouvidoria (ouvidoria@redecomunita.org.br), QR Code de pesquisa online, Superior Hierárquico ou Comissão de Ética.",
+              "Apenas comentar informalmente nos corredores.",
+              "Não há canais internos de acolhimento."
+            ],
+            correct: 0
+          }
+        ]
+      }
+    ];
+
+    // =========================================================================
+    // 4. ESTADO DO JOGO 2D CASTLEVANIA + RPG (ESTILO SKY ISLANDS PIXEL ART)
+    // =========================================================================
+    const LEVEL_WIDTH = 2600;
+    const GROUND_Y = 445;
+
+    let currentLevelIdx = 0;
+    let score = 0;
+    let combo = 1;
+    let perfectAnswers = 0;
+    let hp = 100;
+    let maxHp = 100;
+    let mp = 100;
+    let maxMp = 100;
+    let xp = 0;
+    let rpgLevel = 1;
+    let playerName = "Colaborador(a)";
+    let playerUnit = "Rede Comunitá";
+    let gameRunning = false;
+    let gamePaused = false;
+    let animTick = 0;
+    let elapsedFrames = 0;
+    let cameraX = 0;
+
+    const player = {
+      x: 90,
+      y: 340,
+      w: 38,
+      h: 58,
+      vx: 0,
+      vy: 0,
+      speed: 4.8,
+      jumpStrength: -12.8,
+      grounded: false,
+      onLadder: false,
+      facing: 1,
+      invulnerable: 0,
+      powerTimer: 0,
+      hasMount: false,
+      attackTimer: 0,
+      attackCooldown: 0,
+      trail: []
+    };
+
+    const keys = { left: false, right: false, jump: false, down: false };
+
+    // Entidades das Ilhas Flutuantes (Estilo Imagem de Referência)
+    let platforms = [];
+    let ladders = [];
+    let spikes = [];
+    let pendulums = [];
+    let strawberries = [];
+    let qBlocks = [];
+    let candlesticks = [];
+    let drops = [];
+    let enemies = [];
+    let projectiles = [];
+    let floatingTexts = [];
+    let particles = [];
+    let puzzleOrb = null;
+    let puzzleAltar = null;
+    let crystalSwitch = null;
+    let bridgeGap = { xStart: 1020, xEnd: 1260, active: false };
+    let gateBarrier = { x: 2360, active: true };
+    let portal = { x: 2450, y: GROUND_Y - 115, w: 68, h: 115, open: false };
+
+    function initLevel(idx) {
+      const lvl = LEVELS[idx];
+      player.x = 90;
+      player.y = 330;
+      player.vx = 0;
+      player.vy = 0;
+      player.facing = 1;
+      player.onLadder = false;
+      player.attackTimer = 0;
+      player.trail = [];
+      cameraX = 0;
+      projectiles = [];
+      floatingTexts = [];
+      particles = [];
+      drops = [];
+
+      // Fosso do Abismo entre as Ilhas (X=1020 a X=1260) - Exige ativar a Ponte do Puzzle!
+      bridgeGap = { xStart: 1020, xEnd: 1260, active: false };
+
+      // Ilhas Flutuantes de Grama e Rocha Pixel Art (Camadas baixas e altas como na referência)
+      platforms = [
+        { x: 240, y: 315, w: 230, h: 42 },
+        { x: 560, y: 205, w: 290, h: 46 },
+        { x: 960, y: 265, w: 260, h: 42 },
+        { x: 1320, y: 310, w: 230, h: 42 },
+        { x: 1620, y: 195, w: 280, h: 46 },
+        { x: 1960, y: 295, w: 200, h: 42 }
+      ];
+
+      // Escadas de Madeira conectando as Ilhas Flutuantes
+      ladders = [
+        { x: 420, yTop: 315, yBottom: GROUND_Y, w: 32 },
+        { x: 590, yTop: 205, yBottom: 315, w: 32 },
+        { x: 1350, yTop: 310, yBottom: GROUND_Y, w: 32 },
+        { x: 1650, yTop: 195, yBottom: 310, w: 32 },
+        { x: 2110, yTop: 295, yBottom: GROUND_Y, w: 32 }
+      ];
+
+      // Trios de Espinhos Metálicos Pixel Art sobre as ilhas
+      spikes = [
+        { x: 295, y: 315, count: 3 },
+        { x: 1435, y: 310, count: 3 },
+        { x: 2010, y: 295, count: 3 }
+      ];
+
+      // Machados Pêndulo Oscilantes pendurados sob as ilhas altas
+      pendulums = [
+        { pivotX: 705, pivotY: 245, length: 95, speed: 0.045, maxAngle: 0.65, phase: 0 },
+        { pivotX: 1090, pivotY: 300, length: 85, speed: 0.05, maxAngle: 0.6, phase: 1.5 },
+        { pivotX: 1760, yPivot: 235, pivotY: 235, length: 95, speed: 0.048, maxAngle: 0.65, phase: 3.1 }
+      ];
+
+      // Morangos Pixel Art flutuando em trios (como na imagem enviada!)
+      strawberries = [
+        { x: 655, y: 155, collected: false },
+        { x: 705, y: 155, collected: false },
+        { x: 755, y: 155, collected: false },
+        { x: 1040, y: 215, collected: false },
+        { x: 1090, y: 215, collected: false },
+        { x: 1140, y: 215, collected: false },
+        { x: 1715, y: 145, collected: false },
+        { x: 1765, y: 145, collected: false },
+        { x: 1815, y: 145, collected: false }
+      ];
+
+      // Puzzle: Esfera Rúnica Empurrável + Altar no Chão + Cristal Aéreo
+      puzzleOrb = { x: 740, y: GROUND_Y - 21, r: 21 };
+      puzzleAltar = { x: 940, y: GROUND_Y - 10, w: 58, h: 10 };
+      crystalSwitch = { x: 1185, y: 175, r: 18, hit: false };
+
+      // 3 Grimórios do Saber (?)
+      qBlocks = [
+        { x: 355, y: 215, w: 46, h: 46, answered: false, qIndex: 0, bounce: 0, attempts: 0 },
+        { x: 805, y: 105, w: 46, h: 46, answered: false, qIndex: 1, bounce: 0, attempts: 0 },
+        { x: 1850, y: 95, w: 46, h: 46, answered: false, qIndex: 2, bounce: 0, attempts: 0 }
+      ];
+
+      // Castiçais Clássicos (Quebre com o Chicote para dropar Corações, Estrela ou Cãopanheiro!)
+      candlesticks = [
+        { x: 210, y: GROUND_Y - 22, broken: false, dropType: 'heart' },
+        { x: 520, y: GROUND_Y - 22, broken: false, dropType: 'mp' },
+        { x: 630, y: 183, broken: false, dropType: 'mount' },
+        { x: 985, y: GROUND_Y - 22, broken: false, dropType: 'heart' },
+        { x: 1295, y: GROUND_Y - 22, broken: false, dropType: 'star' },
+        { x: 1600, y: GROUND_Y - 22, broken: false, dropType: 'mp' },
+        { x: 1990, y: GROUND_Y - 22, broken: false, dropType: 'heart' }
+      ];
+
+      // Monstros e Chefe da Fase (com Barra de HP individual)
+      enemies = lvl.enemies.map(e => ({
+        x: e.x,
+        startX: e.x,
+        y: e.type === 'boss' ? GROUND_Y - 76 : (e.type === 'walker' ? GROUND_Y - 48 : e.y),
+        startY: e.y,
+        w: e.type === 'boss' ? 66 : 44,
+        h: e.type === 'boss' ? 76 : 48,
+        vx: e.type === 'boss' ? 1.5 : 2.1,
+        range: e.type === 'boss' ? 110 : 125,
+        type: e.type,
+        label: e.label,
+        hp: e.hp,
+        maxHp: e.hp,
+        color: e.color,
+        alive: true,
+        hurtTimer: 0
+      }));
+
+      gateBarrier = { x: 2360, active: true };
+      portal.open = false;
+
+      document.getElementById('quest-text').textContent = lvl.puzzleQuest;
+      updateHUD();
+    }
+
+    // =========================================================================
+    // 5. SISTEMA DE RANKING LOCAL (LOCALSTORAGE) E FORMATAÇÃO
+    // =========================================================================
+    const RANKING_KEY = 'rede_comunita_sky_rpg_ranking_v1';
+
+    function formatTime(frames) {
+      const totalSec = Math.floor(frames / 60);
+      const m = String(Math.floor(totalSec / 60)).padStart(2, '0');
+      const s = String(totalSec % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function getRanking() {
+      try {
+        const raw = localStorage.getItem(RANKING_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch (e) {}
+      return [
+        { id: 'seed1', name: 'Mona Lisa D.', unit: 'Projetos', hero: 'Super Nina', score: 3450, time: '02:15' },
+        { id: 'seed2', name: 'Carlos Eduardo', unit: 'Gente e Gestão', hero: 'Super Kauan', score: 3120, time: '02:38' },
+        { id: 'seed3', name: 'Fernanda S.', unit: 'Unidade Leste', hero: 'Super Bia', score: 2890, time: '02:50' }
+      ];
+    }
+
+    function saveScoreToRanking(entry) {
+      const list = getRanking();
+      const id = 'p_' + Date.now();
+      list.push({ id, ...entry });
+      list.sort((a, b) => b.score - a.score);
+      const top10 = list.slice(0, 10);
+      try {
+        localStorage.setItem(RANKING_KEY, JSON.stringify(top10));
+      } catch (e) {}
+      return id;
+    }
+
+    function renderRankingList(ulEl, highlightId = null) {
+      if (!ulEl) return;
+      ulEl.innerHTML = '';
+      const list = getRanking();
+      list.forEach((item, idx) => {
+        const li = document.createElement('li');
+        li.className = 'ranking-item' + (item.id === highlightId ? ' highlight' : '');
+        const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}º`;
+        li.innerHTML = `
+          <span class="rank-pos">${medal}</span>
+          <span class="rank-name"><strong>${item.name}</strong> <small>(${item.unit} • ${item.hero})</small></span>
+          <span class="rank-score">${item.score} pts <small style="color:#666;">(${item.time})</small></span>
+        `;
+        ulEl.appendChild(li);
+      });
+    }
+
+    // =========================================================================
+    // 6. MECÂNICAS RPG, CHICOTE CASTLEVANIA, SUB-ARMA E PUZZLES
+    // =========================================================================
+    function rectOverlap(ax, ay, aw, ah, bx, by, bw, bh) {
+      return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+    }
+
+    function spawnParticles(x, y, color, count = 12) {
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x,
+          y,
+          vx: (Math.random() - 0.5) * 6,
+          vy: (Math.random() - 0.7) * 6,
+          color,
+          life: 24 + Math.random() * 14
+        });
+      }
+    }
+
+    function addFloatingText(x, y, text, color = '#FFC700') {
+      floatingTexts.push({ x, y, text, color, life: 45 });
+    }
+
+    let bannerTimeout = null;
+    function showBanner(msg) {
+      const b = document.getElementById('floating-banner');
+      if (!b) return;
+      b.textContent = msg;
+      b.classList.remove('hidden');
+      if (bannerTimeout) clearTimeout(bannerTimeout);
+      bannerTimeout = setTimeout(() => b.classList.add('hidden'), 3200);
+    }
+
+    function gainXP(amount) {
+      const bonus = selectedChar.id === 'jorge' ? Math.round(amount * 1.25) : amount;
+      xp += bonus;
+      const needed = rpgLevel * 150;
+      if (xp >= needed) {
+        xp -= needed;
+        rpgLevel++;
+        maxHp += 15;
+        hp = maxHp;
+        maxMp += 10;
+        mp = maxMp;
+        playSound('powerup');
+        showBanner(`🌟 LEVEL UP! Você alcançou o Nível RPG ${rpgLevel}! (+HP e +Dano)`);
+      }
+      updateHUD();
+    }
+
+    function updateHUD() {
+      const setTxt = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+      setTxt('hud-hero', selectedChar.name);
+      setTxt('hud-lvl-rpg', rpgLevel);
+      setTxt('hud-level', `${currentLevelIdx + 1}/${LEVELS.length}`);
+      const answeredCount = qBlocks.filter(b => b.answered).length;
+      setTxt('hud-blocks', `${answeredCount}/${qBlocks.length}`);
+      setTxt('hud-score', score);
+      setTxt('hud-combo', `x${combo}`);
+      setTxt('hud-mount', player.hasMount ? 'Cãopanheiro' : (player.powerTimer > 0 ? '⭐ Invencível' : 'A pé'));
+      setTxt('hud-time', formatTime(elapsedFrames));
+
+      const pEl = document.getElementById('hud-puzzle');
+      if (pEl) {
+        pEl.textContent = bridgeGap.active ? 'Ponte Ativa ✓' : 'Trancado';
+        pEl.style.color = bridgeGap.active ? '#2ECC71' : '#80D8FF';
+      }
+
+      const hpBar = document.getElementById('hud-hp-bar');
+      if (hpBar) hpBar.style.width = `${Math.max(0, Math.min(100, (hp / maxHp) * 100))}%`;
+      const mpBar = document.getElementById('hud-mp-bar');
+      if (mpBar) mpBar.style.width = `${Math.max(0, Math.min(100, (mp / maxMp) * 100))}%`;
+      const xpBar = document.getElementById('hud-xp-bar');
+      if (xpBar) xpBar.style.width = `${Math.max(0, Math.min(100, (xp / (rpgLevel * 150)) * 100))}%`;
+    }
+
+    function solveStagePuzzle() {
+      if (bridgeGap.active) return;
+      bridgeGap.active = true;
+      score += 200 * combo;
+      gainXP(80);
+      playSound('puzzle');
+      spawnParticles((bridgeGap.xStart + bridgeGap.xEnd) / 2, GROUND_Y, '#00E5FF', 22);
+      showBanner("🧩 PUZZLE RESOLVIDO! A Ponte da Cooperação foi erguida sobre o abismo!");
+      updateHUD();
+    }
+
+    function triggerWhipAttack() {
+      if (!gameRunning || gamePaused || player.attackCooldown > 0) return;
+      player.attackTimer = 14;
+      player.attackCooldown = 20;
+      playSound('whip');
+
+      const reach = selectedChar.id === 'nina' ? 98 : 84;
+      const hitX = player.facing === 1 ? player.x + player.w : player.x - reach;
+      const hitY = player.y + 8;
+      const hitH = player.h - 14;
+
+      // 1. Quebra Castiçais
+      candlesticks.forEach(c => {
+        if (!c.broken && rectOverlap(hitX, hitY, reach, hitH, c.x - 14, c.y - 26, 28, 32)) {
+          c.broken = true;
+          playSound('candle');
+          spawnParticles(c.x, c.y - 12, '#FFC700', 10);
+          drops.push({ x: c.x, y: c.y - 14, vy: -4.5, type: c.dropType, collected: false });
+        }
+      });
+
+      // 2. Aciona o Cristal Aéreo da Ponte
+      if (!bridgeGap.active && rectOverlap(hitX, hitY, reach, hitH, crystalSwitch.x - 18, crystalSwitch.y - 18, 36, 36)) {
+        crystalSwitch.hit = true;
+        solveStagePuzzle();
+      }
+
+      // 3. Empurra a Esfera Rúnica com o Chicote
+      if (!bridgeGap.active && rectOverlap(hitX, hitY, reach, hitH, puzzleOrb.x - 22, puzzleOrb.y - 22, 44, 44)) {
+        puzzleOrb.x += player.facing * 45;
+        puzzleOrb.x = Math.max(540, Math.min(990, puzzleOrb.x));
+        if (Math.abs(puzzleOrb.x - (puzzleAltar.x + puzzleAltar.w / 2)) < 28) {
+          puzzleOrb.x = puzzleAltar.x + puzzleAltar.w / 2;
+          solveStagePuzzle();
+        }
+      }
+
+      // 4. Abre Grimório (?) com o Chicote
+      qBlocks.forEach(b => {
+        if (!b.answered && rectOverlap(hitX, hitY, reach, hitH, b.x, b.y, b.w, b.h)) {
+          b.bounce = 8;
+          triggerQuiz(b);
+        }
+      });
+
+      // 5. Causa Dano aos Monstros e Chefes
+      const baseDmg = (selectedChar.id === 'kauan' ? 42 : 34) + (rpgLevel - 1) * 8;
+      const finalDmg = player.powerTimer > 0 ? baseDmg * 2 : baseDmg;
+      enemies.forEach(en => {
+        if (en.alive && rectOverlap(hitX, hitY, reach, hitH, en.x, en.y, en.w, en.h)) {
+          damageEnemy(en, finalDmg);
+        }
+      });
+    }
+
+    function triggerSubWeapon() {
+      if (!gameRunning || gamePaused) return;
+      if (mp < 20) {
+        showBanner("💧 MP insuficiente! Colete Morangos ou Cristais nos Castiçais!");
+        return;
+      }
+      mp -= 20;
+      playSound('magic');
+      const dmg = 45 + (rpgLevel - 1) * 10;
+      projectiles.push({
+        x: player.x + player.w / 2,
+        y: player.y + 24,
+        vx: player.facing * 7.5,
+        angle: 0,
+        life: 64,
+        dmg
+      });
+      updateHUD();
+    }
+
+    function damageEnemy(en, dmg) {
+      en.hp -= dmg;
+      en.hurtTimer = 8;
+      playSound('candle');
+      spawnParticles(en.x + en.w / 2, en.y + en.h / 2, '#FFC700', 10);
+      addFloatingText(en.x + en.w / 2, en.y - 8, `-${dmg} HP`, '#FFeb3b');
+
+      if (en.hp <= 0) {
+        en.alive = false;
+        const pts = (en.type === 'boss' ? 300 : 100) * combo;
+        score += pts;
+        gainXP(en.type === 'boss' ? 120 : 50);
+        spawnParticles(en.x + en.w / 2, en.y + en.h / 2, en.color, 20);
+        addFloatingText(en.x + en.w / 2, en.y - 24, `+${pts} PTS!`, '#2ECC71');
+        updateHUD();
+      }
+    }
+
+    // =========================================================================
+    // 7. ATUALIZAÇÃO FÍSICA 2D E LÓGICA DO JOGO (COM ESCADAS, PÊNDULOS E ESPINHOS)
+    // =========================================================================
+    function update2D() {
+      if (!gameRunning || gamePaused) return;
+
+      animTick++;
+      elapsedFrames++;
+      if (elapsedFrames % 30 === 0) {
+        if (selectedChar.id === 'bia' && mp < maxMp) mp = Math.min(maxMp, mp + 2);
+        updateHUD();
+      }
+
+      if (player.powerTimer > 0) player.powerTimer--;
+      if (player.invulnerable > 0) player.invulnerable--;
+      if (player.attackTimer > 0) player.attackTimer--;
+      if (player.attackCooldown > 0) player.attackCooldown--;
+
+      // Movimento Horizontal
+      const spd = (player.hasMount ? player.speed * 1.28 : player.speed) + (selectedChar.id === 'leo' ? 0.6 : 0);
+      if (keys.left) {
+        player.vx = -spd;
+        player.facing = -1;
+      } else if (keys.right) {
+        player.vx = spd;
+        player.facing = 1;
+      } else {
+        player.vx *= 0.78;
+      }
+
+      // Verifica se o jogador está sobre uma Escada de Madeira (Ladder)
+      const playerCenterX = player.x + player.w / 2;
+      const touchingLadder = ladders.find(ld =>
+        Math.abs(playerCenterX - (ld.x + ld.w / 2)) < 24 &&
+        player.y + player.h >= ld.yTop - 10 &&
+        player.y + player.h <= ld.yBottom + 12
+      );
+
+      if (touchingLadder && (keys.jump || keys.down)) {
+        player.onLadder = true;
+      } else if (!touchingLadder) {
+        player.onLadder = false;
+      }
+
+      if (player.onLadder && touchingLadder) {
+        player.vy = 0;
+        player.grounded = true;
+        if (keys.jump) {
+          player.y -= 4.2;
+          if (player.y + player.h <= touchingLadder.yTop) {
+            player.y = touchingLadder.yTop - player.h;
+            player.onLadder = false;
+          }
+        } else if (keys.down) {
+          player.y += 4.2;
+          if (player.y + player.h >= touchingLadder.yBottom) {
+            player.y = touchingLadder.yBottom - player.h;
+            player.onLadder = false;
+          }
+        }
+      } else {
+        // Pulo normal
+        if (keys.jump && player.grounded) {
+          player.vy = player.hasMount ? player.jumpStrength * 1.18 : player.jumpStrength;
+          player.grounded = false;
+          playSound('jump');
+        }
+        // Gravidade
+        player.vy += 0.6;
+      }
+
+      player.x += player.vx;
+      player.y += player.vy;
+
+      // Rastro de Movimento
+      if (animTick % 3 === 0 && (Math.abs(player.vx) > 2 || !player.grounded || player.powerTimer > 0)) {
+        player.trail.push({ x: player.x, y: player.y, facing: player.facing, alpha: 0.45 });
+        if (player.trail.length > 5) player.trail.shift();
+      }
+      player.trail.forEach(t => t.alpha -= 0.03);
+      player.trail = player.trail.filter(t => t.alpha > 0);
+
+      // Limites do Mapa e Portão Selado
+      if (player.x < 16) player.x = 16;
+      if (gateBarrier.active && player.x + player.w > gateBarrier.x) {
+        player.x = gateBarrier.x - player.w;
+      }
+      if (player.x + player.w > LEVEL_WIDTH - 16) player.x = LEVEL_WIDTH - 16 - player.w;
+
+      if (!player.onLadder) player.grounded = false;
+
+      // Verifica se está sobre o Abismo de Espinhos/Veneno sem a Ponte ativa
+      const overPoisonPit = !bridgeGap.active && (player.x + player.w / 2 > bridgeGap.xStart && player.x + player.w / 2 < bridgeGap.xEnd);
+
+      if (!overPoisonPit && player.y + player.h >= GROUND_Y) {
+        player.y = GROUND_Y - player.h;
+        player.vy = 0;
+        player.grounded = true;
+      } else if (overPoisonPit && player.y + player.h >= GROUND_Y + 28) {
+        takeDamage(25, "⚠️ Abismo entre as Ilhas! Ative a Ponte empurrando a Esfera ou acertando o Cristal!");
+        player.x = bridgeGap.xStart - 70;
+        player.y = GROUND_Y - player.h - 40;
+        player.vy = 0;
+      }
+
+      // Colisão com Ilhas Flutuantes 2D
+      platforms.forEach(p => {
+        if (
+          !player.onLadder &&
+          player.x + player.w > p.x + 6 &&
+          player.x < p.x + p.w - 6 &&
+          player.y + player.h >= p.y &&
+          player.y + player.h <= p.y + 20 &&
+          player.vy >= 0
+        ) {
+          player.y = p.y - player.h;
+          player.vy = 0;
+          player.grounded = true;
+        }
+      });
+
+      // Colisão com os Morangos Flutuantes (Strawberries da imagem!)
+      strawberries.forEach(st => {
+        if (!st.collected && Math.hypot((player.x + player.w / 2) - st.x, (player.y + player.h / 2) - st.y) < 30) {
+          st.collected = true;
+          hp = Math.min(maxHp, hp + 15);
+          mp = Math.min(maxMp, mp + 15);
+          const pts = 50 * combo;
+          score += pts;
+          gainXP(25);
+          playSound('heart');
+          spawnParticles(st.x, st.y, '#FF1744', 10);
+          addFloatingText(st.x, st.y - 10, `🍓 +${pts} PTS`, '#FF5252');
+          updateHUD();
+        }
+      });
+
+      // Colisão com Espinhos Metálicos sobre as ilhas
+      spikes.forEach(sp => {
+        const spW = sp.count * 16;
+        if (
+          player.powerTimer === 0 &&
+          player.invulnerable === 0 &&
+          rectOverlap(player.x + 6, player.y + 10, player.w - 12, player.h - 10, sp.x, sp.y - 18, spW, 18)
+        ) {
+          takeDamage(18, "🗡️ Cuidado com os Espinhos Metálicos! Pule por cima deles!");
+          player.vy = -8;
+        }
+      });
+
+      // Colisão com Machados Pêndulo Oscilantes
+      pendulums.forEach(pd => {
+        const angle = Math.sin(animTick * pd.speed + pd.phase) * pd.maxAngle;
+        const axeX = pd.pivotX + Math.sin(angle) * pd.length;
+        const axeY = pd.pivotY + Math.cos(angle) * pd.length;
+        if (
+          player.powerTimer === 0 &&
+          player.invulnerable === 0 &&
+          Math.hypot((player.x + player.w / 2) - axeX, (player.y + player.h / 2) - axeY) < 32
+        ) {
+          takeDamage(22, "🪓 Atingido pelo Machado Pêndulo! Observe o tempo do balanço!");
+          player.vy = -7;
+        }
+      });
+
+      // Empurrar a Esfera Rúnica do Puzzle pelo Chão
+      if (!bridgeGap.active) {
+        const dxOrb = (puzzleOrb.x) - (player.x + player.w / 2);
+        const dyOrb = (puzzleOrb.y) - (player.y + player.h / 2);
+        if (Math.abs(dxOrb) < 34 && Math.abs(dyOrb) < 40) {
+          puzzleOrb.x += player.facing * 3.5;
+          puzzleOrb.x = Math.max(540, Math.min(990, puzzleOrb.x));
+        }
+        if (Math.abs(puzzleOrb.x - (puzzleAltar.x + puzzleAltar.w / 2)) < 26) {
+          puzzleOrb.x = puzzleAltar.x + puzzleAltar.w / 2;
+          solveStagePuzzle();
+        }
+      }
+
+      // Colisão com Grimórios do Saber (?)
+      qBlocks.forEach(b => {
+        if (b.bounce > 0) b.bounce--;
+        const overlapX = player.x + player.w > b.x && player.x < b.x + b.w;
+        if (overlapX && player.vy < 0 && player.y <= b.y + b.h && player.y >= b.y + b.h - 18) {
+          player.vy = 2;
+          b.bounce = 8;
+          if (!b.answered) triggerQuiz(b);
+        }
+      });
+
+      // Atualiza Drops dos Castiçais
+      drops.forEach(d => {
+        if (d.collected) return;
+        d.vy += 0.35;
+        d.y += d.vy;
+        if (d.y > GROUND_Y - 18) {
+          d.y = GROUND_Y - 18;
+          d.vy = 0;
+        }
+        if (rectOverlap(player.x, player.y, player.w, player.h, d.x - 16, d.y - 16, 32, 32)) {
+          d.collected = true;
+          if (d.type === 'heart') {
+            hp = Math.min(maxHp, hp + 25);
+            score += 40 * combo;
+            playSound('heart');
+            addFloatingText(d.x, d.y, "+25 HP", "#2ECC71");
+          } else if (d.type === 'mp') {
+            mp = Math.min(maxMp, mp + 40);
+            score += 40 * combo;
+            playSound('heart');
+            addFloatingText(d.x, d.y, "+40 MP", "#00E5FF");
+          } else if (d.type === 'star') {
+            player.powerTimer = 420;
+            score += 150;
+            playSound('powerup');
+            showBanner("⭐ SUPER EMPATIA ATIVA! Invencível + Dano Dobrado!");
+          } else if (d.type === 'mount') {
+            player.hasMount = true;
+            score += 200;
+            playSound('powerup');
+            showBanner("🐾 CÃOPANHEIRO INVOCADO! Super Salto e Proteção!");
+          }
+          updateHUD();
+        }
+      });
+
+      // Atualiza Projéteis da Sub-Arma (Cruz/Bumerangue de Luz)
+      projectiles.forEach(pr => {
+        pr.x += pr.vx;
+        pr.angle += 0.25;
+        pr.life--;
+        if (pr.life === 32) pr.vx *= -1;
+
+        candlesticks.forEach(c => {
+          if (!c.broken && Math.hypot(pr.x - c.x, pr.y - c.y) < 28) {
+            c.broken = true;
+            playSound('candle');
+            drops.push({ x: c.x, y: c.y - 10, vy: -4, type: c.dropType, collected: false });
+          }
+        });
+
+        if (!bridgeGap.active && Math.hypot(pr.x - crystalSwitch.x, pr.y - crystalSwitch.y) < 28) {
+          crystalSwitch.hit = true;
+          solveStagePuzzle();
+        }
+
+        enemies.forEach(en => {
+          if (en.alive && rectOverlap(pr.x - 14, pr.y - 14, 28, 28, en.x, en.y, en.w, en.h)) {
+            damageEnemy(en, pr.dmg);
+            pr.life = 0;
+          }
+        });
+      });
+      projectiles = projectiles.filter(pr => pr.life > 0);
+
+      // Atualiza Monstros (Walkers, Flyers senoidais e Chefes)
+      enemies.forEach(en => {
+        if (!en.alive) return;
+        if (en.hurtTimer > 0) en.hurtTimer--;
+
+        en.x += en.vx;
+        if (en.x > en.startX + en.range || en.x < en.startX - en.range) {
+          en.vx *= -1;
+        }
+        if (en.type === 'flyer') {
+          en.y = en.startY + Math.sin(animTick * 0.07 + en.startX) * 38;
+        }
+
+        if (rectOverlap(player.x + 4, player.y + 4, player.w - 8, player.h - 8, en.x + 4, en.y + 4, en.w - 8, en.h - 8)) {
+          if (player.powerTimer > 0 || (player.vy > 0 && player.y + player.h - player.vy <= en.y + 18)) {
+            player.vy = -10;
+            damageEnemy(en, 45 + rpgLevel * 5);
+          } else if (player.invulnerable === 0) {
+            takeDamage(en.type === 'boss' ? 28 : 18, `⚠️ Atingido por ${en.label}! Use o Chicote [J] ou Magia [K]!`);
+            player.vy = -6;
+          }
+        }
+      });
+
+      particles.forEach(pt => {
+        pt.x += pt.vx;
+        pt.y += pt.vy;
+        pt.life--;
+      });
+      particles = particles.filter(pt => pt.life > 0);
+
+      floatingTexts.forEach(ft => {
+        ft.y -= 0.8;
+        ft.life--;
+      });
+      floatingTexts = floatingTexts.filter(ft => ft.life > 0);
+
+      // Chegou no Portal Final
+      if (portal.open && rectOverlap(player.x, player.y, player.w, player.h, portal.x, portal.y, portal.w, portal.h)) {
+        playSound('powerup');
+        if (currentLevelIdx < LEVELS.length - 1) {
+          currentLevelIdx++;
+          showBanner(`🏰 Avançando para a Fase ${currentLevelIdx + 1}/4!`);
+          initLevel(currentLevelIdx);
+        } else {
+          finishMission();
+        }
+      }
+
+      // Câmera Suave 2D
+      const targetCamX = player.x - canvas.width * 0.34;
+      cameraX += (targetCamX - cameraX) * 0.12;
+      cameraX = Math.max(0, Math.min(LEVEL_WIDTH - canvas.width, cameraX));
+    }
+
+    function takeDamage(amount, message) {
+      if (player.hasMount) {
+        player.hasMount = false;
+        player.invulnerable = 65;
+        playSound('hit');
+        showBanner("🐾 O Cãopanheiro absorveu o golpe por você!");
+        updateHUD();
+        return;
+      }
+      const reduced = selectedChar.id === 'clara' ? Math.max(8, amount - 6) : amount;
+      hp -= reduced;
+      combo = 1;
+      player.invulnerable = 65;
+      playSound('hit');
+      addFloatingText(player.x, player.y, `-${reduced} HP`, "#FF1744");
+      showBanner(message);
+      if (hp <= 0) {
+        hp = maxHp;
+        mp = maxMp;
+        score = Math.max(0, score - 100);
+        showBanner("🔄 Energia restaurada pela Rede! Tente novamente a fase!");
+        initLevel(currentLevelIdx);
+      }
+      updateHUD();
+    }
+
+    // =========================================================================
+    // 8. RENDERIZAÇÃO 2D PIXEL ART: ILHAS FLUTUANTES, NUVENS, ESCADAS E PÊNDULOS
+    // =========================================================================
+    function drawPixelIsland(x, y, w, h) {
+      const tile = 8;
+      for (let px = 0; px < w; px += tile) {
+        const depthOffset = Math.floor((Math.sin(px * 0.15 + x) + 1) * 10);
+        const colH = h + depthOffset;
+        for (let py = tile; py < colH; py += tile) {
+          if ((px < 16 || px > w - 24) && py > h - 8) continue;
+          const isEdge = px < 8 || px >= w - 8 || py >= colH - 8;
+          const isHighlight = ((px + py) % 24 === 0);
+          ctx.fillStyle = isEdge ? '#1E1A24' : (isHighlight ? '#5C4433' : '#3B2D2B');
+          ctx.fillRect(x + px, y + py, tile, tile);
+        }
+      }
+
+      for (let px = 0; px < w; px += tile) {
+        ctx.fillStyle = '#94E344';
+        ctx.fillRect(x + px, y, tile, 5);
+        ctx.fillStyle = '#56B828';
+        ctx.fillRect(x + px, y + 5, tile, 6);
+        const grassDrop = ((px * 7 + x) % 16 === 0) ? 10 : 4;
+        ctx.fillStyle = '#2E7D18';
+        ctx.fillRect(x + px, y + 11, tile, grassDrop);
+
+        if ((px + x) % 56 === 0 && px > 16 && px < w - 24) {
+          const vineLen = 18 + ((px * 3) % 22);
+          ctx.fillStyle = '#4CAF50';
+          for (let vy = 14; vy < 14 + vineLen; vy += 6) {
+            ctx.fillRect(x + px + 2, y + vy, 4, 5);
+          }
+        }
+      }
+    }
+
+    function drawPixelLadder(ld) {
+      ctx.save();
+      ctx.fillStyle = '#5D3A1A';
+      ctx.fillRect(ld.x, ld.yTop, 5, ld.yBottom - ld.yTop);
+      ctx.fillRect(ld.x + ld.w - 5, ld.yTop, 5, ld.yBottom - ld.yTop);
+      ctx.fillStyle = '#8B5A2B';
+      ctx.fillRect(ld.x + 1, ld.yTop, 3, ld.yBottom - ld.yTop);
+      ctx.fillRect(ld.x + ld.w - 4, ld.yTop, 3, ld.yBottom - ld.yTop);
+
+      for (let ry = ld.yTop + 10; ry < ld.yBottom - 4; ry += 16) {
+        ctx.fillStyle = '#5D3A1A';
+        ctx.fillRect(ld.x - 2, ry, ld.w + 4, 5);
+        ctx.fillStyle = '#A06B3B';
+        ctx.fillRect(ld.x, ry + 1, ld.w, 3);
+      }
+      ctx.restore();
+    }
+
+    function drawPixelSpikes(sp) {
+      for (let i = 0; i < sp.count; i++) {
+        const sx = sp.x + i * 16;
+        const sy = sp.y;
+        ctx.fillStyle = '#607D8B';
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(sx + 8, sy - 20);
+        ctx.lineTo(sx + 16, sy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#ECEFF1';
+        ctx.beginPath();
+        ctx.moveTo(sx + 2, sy);
+        ctx.lineTo(sx + 8, sy - 20);
+        ctx.lineTo(sx + 8, sy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#37474F';
+        ctx.fillRect(sx + 1, sy - 3, 14, 3);
+      }
+    }
+
+    function drawPixelPendulum(pd) {
+      const angle = Math.sin(animTick * pd.speed + pd.phase) * pd.maxAngle;
+      ctx.save();
+      ctx.translate(pd.pivotX, pd.pivotY);
+      ctx.rotate(angle);
+
+      ctx.fillStyle = '#6D4C41';
+      ctx.fillRect(-3, 0, 6, pd.length);
+      ctx.fillStyle = '#3E2723';
+      ctx.fillRect(-4, 0, 8, 10);
+
+      ctx.translate(0, pd.length);
+      ctx.fillStyle = '#CFD8DC';
+      ctx.beginPath();
+      ctx.arc(0, 0, 22, -Math.PI * 0.78, Math.PI * 0.78);
+      ctx.arc(0, 0, 22, Math.PI * 0.22, -Math.PI * 0.22, true);
+      ctx.fill();
+
+      ctx.fillStyle = '#90A4AE';
+      ctx.beginPath();
+      ctx.moveTo(-6, -12);
+      ctx.quadraticCurveTo(-24, -18, -22, 0);
+      ctx.quadraticCurveTo(-24, 18, -6, 12);
+      ctx.moveTo(6, -12);
+      ctx.quadraticCurveTo(24, -18, 22, 0);
+      ctx.quadraticCurveTo(24, 18, 6, 12);
+      ctx.fill();
+
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      ctx.fillStyle = '#455A64';
+      ctx.fillRect(-5, -14, 10, 28);
+      ctx.restore();
+    }
+
+    function drawPixelStrawberry(x, y, tickOffset) {
+      const bob = Math.sin(animTick * 0.08 + tickOffset) * 3.5;
+      ctx.save();
+      ctx.translate(x, y + bob);
+
+      ctx.fillStyle = '#8E1B1B';
+      ctx.fillRect(-10, -8, 20, 16);
+      ctx.fillRect(-7, 8, 14, 5);
+      ctx.fillRect(-4, 13, 8, 3);
+
+      ctx.fillStyle = '#D32F2F';
+      ctx.fillRect(-8, -7, 16, 14);
+      ctx.fillRect(-5, 7, 10, 5);
+
+      ctx.fillStyle = '#FF6659';
+      ctx.fillRect(-6, -5, 5, 7);
+
+      ctx.fillStyle = '#FFCCBC';
+      ctx.fillRect(-4, -2, 2, 2);
+      ctx.fillRect(2, -3, 2, 2);
+      ctx.fillRect(-1, 3, 2, 2);
+      ctx.fillRect(4, 2, 2, 2);
+      ctx.fillRect(-5, 4, 2, 2);
+
+      ctx.fillStyle = '#2E7D32';
+      ctx.fillRect(-8, -11, 16, 4);
+      ctx.fillStyle = '#66BB6A';
+      ctx.fillRect(-5, -13, 10, 3);
+      ctx.restore();
+    }
+
+    function drawCloudBank(offsetX, y, scale, alpha) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = '#FFFFFF';
+      const puffs = [
+        { dx: 0, dy: 10, r: 34 },
+        { dx: 35, dy: -8, r: 46 },
+        { dx: 82, dy: 4, r: 38 },
+        { dx: 118, dy: 14, r: 28 },
+        { dx: 55, dy: 18, r: 40 }
+      ];
+      puffs.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(offsetX + p.dx * scale, y + p.dy * scale, p.r * scale, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.fillStyle = '#D7E3FC';
+      ctx.fillRect(offsetX - 18 * scale, y + 18 * scale, 150 * scale, 16 * scale);
+      ctx.restore();
+    }
+
+    function draw2D() {
+      const skyTopics = [
+        ['#284594', '#5A8DEE', '#DCEEFB'],
+        ['#352F78', '#6B5B95', '#F3D1DC'],
+        ['#1D4E89', '#4EA8DE', '#E2F1FF'],
+        ['#2D1E5F', '#7B3F8C', '#FFE5D9']
+      ];
+      const pal = skyTopics[currentLevelIdx % skyTopics.length];
+      const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      skyGrad.addColorStop(0, pal[0]);
+      skyGrad.addColorStop(0.58, pal[1]);
+      skyGrad.addColorStop(1, pal[2]);
+      ctx.fillStyle = skyGrad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < 7; i++) {
+        const cx = ((i * 260 - cameraX * 0.18) % 1500 + 1500) % 1500 - 160;
+        const cy = 270 + (i % 3) * 45;
+        drawCloudBank(cx, cy, 1.15, 0.88);
+      }
+      for (let i = 0; i < 6; i++) {
+        const cx = ((i * 310 - cameraX * 0.32) % 1600 + 1600) % 1600 - 140;
+        const cy = 365 + (i % 2) * 35;
+        drawCloudBank(cx, cy, 1.4, 0.95);
+      }
+
+      ctx.save();
+      ctx.translate(-cameraX, 0);
+
+      drawPixelIsland(0, GROUND_Y, bridgeGap.xStart, 75);
+      drawPixelIsland(bridgeGap.xEnd, GROUND_Y, LEVEL_WIDTH - bridgeGap.xEnd, 75);
+
+      ctx.fillStyle = 'rgba(27, 7, 38, 0.65)';
+      ctx.fillRect(bridgeGap.xStart, GROUND_Y + 25, bridgeGap.xEnd - bridgeGap.xStart, canvas.height - GROUND_Y);
+      ctx.fillStyle = '#FFC700';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('⚡ ABISMO DA DESUNIÃO (ATIVE A PONTE!)', (bridgeGap.xStart + bridgeGap.xEnd) / 2, GROUND_Y + 55);
+
+      if (bridgeGap.active) {
+        ctx.fillStyle = '#8B5A2B';
+        ctx.fillRect(bridgeGap.xStart - 6, GROUND_Y, bridgeGap.xEnd - bridgeGap.xStart + 12, 12);
+        ctx.fillStyle = '#00E5FF';
+        ctx.fillRect(bridgeGap.xStart - 6, GROUND_Y, bridgeGap.xEnd - bridgeGap.xStart + 12, 4);
+      }
+
+      platforms.forEach(p => {
+        drawPixelIsland(p.x, p.y, p.w, p.h);
+      });
+
+      ladders.forEach(ld => drawPixelLadder(ld));
+      spikes.forEach(sp => drawPixelSpikes(sp));
+      pendulums.forEach(pd => drawPixelPendulum(pd));
+
+      strawberries.forEach((st, idx) => {
+        if (!st.collected) drawPixelStrawberry(st.x, st.y, idx);
+      });
+
+      ctx.fillStyle = bridgeGap.active ? '#2ECC71' : '#00E5FF';
+      ctx.fillRect(puzzleAltar.x, puzzleAltar.y, puzzleAltar.w, puzzleAltar.h);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('ALTAR', puzzleAltar.x + puzzleAltar.w / 2, puzzleAltar.y - 4);
+
+      const orbGrad = ctx.createRadialGradient(puzzleOrb.x - 5, puzzleOrb.y - 5, 3, puzzleOrb.x, puzzleOrb.y, puzzleOrb.r);
+      orbGrad.addColorStop(0, '#FFFFFF');
+      orbGrad.addColorStop(0.5, '#00E5FF');
+      orbGrad.addColorStop(1, '#006064');
+      ctx.fillStyle = orbGrad;
+      ctx.beginPath();
+      ctx.arc(puzzleOrb.x, puzzleOrb.y, puzzleOrb.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#FFC700';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(crystalSwitch.x, crystalSwitch.y + Math.sin(animTick * 0.08) * 4);
+      ctx.rotate(animTick * 0.03);
+      ctx.fillStyle = bridgeGap.active ? '#2ECC71' : '#FF007F';
+      ctx.fillRect(-13, -13, 26, 26);
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.strokeRect(-13, -13, 26, 26);
+      ctx.restore();
+      ctx.fillStyle = '#14081C';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillText('CRISTAL DA PONTE', crystalSwitch.x, crystalSwitch.y - 22);
+
+      candlesticks.forEach(c => {
+        if (c.broken) return;
+        ctx.fillStyle = '#FFC700';
+        ctx.fillRect(c.x - 4, c.y - 16, 8, 22);
+        ctx.fillRect(c.x - 10, c.y - 6, 20, 4);
+        ctx.fillStyle = '#FF6D00';
+        ctx.beginPath();
+        ctx.arc(c.x, c.y - 20, 6, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#FFF176';
+        ctx.beginPath();
+        ctx.arc(c.x, c.y - 20, 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      drops.forEach(d => {
+        if (d.collected) return;
+        ctx.font = '22px sans-serif';
+        ctx.textAlign = 'center';
+        const icon = d.type === 'heart' ? '💖' : d.type === 'mp' ? '💎' : d.type === 'star' ? '⭐' : '🐾';
+        ctx.fillText(icon, d.x, d.y);
+      });
+
+      qBlocks.forEach(b => {
+        const by = b.y - b.bounce + Math.sin(animTick * 0.07 + b.x) * 3;
+        ctx.fillStyle = b.answered ? '#2ECC71' : '#FFC700';
+        ctx.beginPath();
+        ctx.roundRect(b.x, by, b.w, b.h, 8);
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#14081C';
+        ctx.stroke();
+
+        ctx.fillStyle = '#14081C';
+        ctx.font = '900 22px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(b.answered ? '✓' : '?', b.x + b.w / 2, by + 31);
+      });
+
+      enemies.forEach(en => {
+        if (!en.alive) return;
+        ctx.save();
+        ctx.fillStyle = en.hurtTimer > 0 ? '#FFFFFF' : en.color;
+        ctx.beginPath();
+        ctx.roundRect(en.x, en.y, en.w, en.h, 10);
+        ctx.fill();
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = '#14081C';
+        ctx.stroke();
+
+        ctx.fillStyle = '#FFC700';
+        ctx.beginPath();
+        ctx.moveTo(en.x + 6, en.y);
+        ctx.lineTo(en.x - 4, en.y - 12);
+        ctx.lineTo(en.x + 16, en.y);
+        ctx.moveTo(en.x + en.w - 6, en.y);
+        ctx.lineTo(en.x + en.w + 4, en.y - 12);
+        ctx.lineTo(en.x + en.w - 16, en.y);
+        ctx.fill();
+
+        ctx.fillStyle = '#FFF';
+        ctx.fillRect(en.x + 9, en.y + 14, 8, 8);
+        ctx.fillRect(en.x + en.w - 17, en.y + 14, 8, 8);
+
+        const barW = en.w + 12;
+        const hpRatio = Math.max(0, en.hp / en.maxHp);
+        ctx.fillStyle = '#111';
+        ctx.fillRect(en.x - 6, en.y - 16, barW, 6);
+        ctx.fillStyle = en.type === 'boss' ? '#FF1744' : '#2ECC71';
+        ctx.fillRect(en.x - 6, en.y - 16, barW * hpRatio, 6);
+
+        ctx.fillStyle = '#14081C';
+        ctx.font = '900 11px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(en.label, en.x + en.w / 2, en.y - 21);
+        ctx.restore();
+      });
+
+      if (gateBarrier.active) {
+        ctx.fillStyle = 'rgba(231, 76, 60, 0.55)';
+        ctx.fillRect(gateBarrier.x, GROUND_Y - 170, 14, 170);
+        ctx.fillStyle = '#14081C';
+        ctx.font = '900 11px sans-serif';
+        ctx.fillText('🔒 RESPONDA OS 3 (?)', gateBarrier.x, GROUND_Y - 178);
+      }
+
+      const flagX = portal.x + 18;
+      const flagBaseY = GROUND_Y;
+      ctx.fillStyle = '#5D3A1A';
+      ctx.fillRect(flagX - 4, flagBaseY - 110, 8, 110);
+      ctx.fillStyle = '#FFC700';
+      ctx.fillRect(flagX - 8, flagBaseY - 116, 16, 8);
+      ctx.fillRect(flagX - 10, flagBaseY - 8, 20, 8);
+
+      const wave = Math.sin(animTick * 0.15) * 5;
+      ctx.fillStyle = portal.open ? '#284594' : '#616161';
+      ctx.beginPath();
+      ctx.moveTo(flagX + 4, flagBaseY - 106);
+      ctx.quadraticCurveTo(flagX + 36, flagBaseY - 106 + wave, flagX + 64, flagBaseY - 90 + wave);
+      ctx.lineTo(flagX + 48, flagBaseY - 80 + wave * 0.5);
+      ctx.lineTo(flagX + 62, flagBaseY - 70 + wave);
+      ctx.quadraticCurveTo(flagX + 34, flagBaseY - 68 - wave, flagX + 4, flagBaseY - 68);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#FFC700';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = '900 13px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(portal.open ? '30★' : '🔒', flagX + 28, flagBaseY - 83 + wave * 0.4);
+
+      player.trail.forEach(t => {
+        ctx.save();
+        ctx.globalAlpha = t.alpha * 0.45;
+        ctx.fillStyle = selectedChar.whipColor;
+        ctx.fillRect(t.x + 6, t.y + 8, player.w - 12, player.h - 8);
+        ctx.restore();
+      });
+
+      if (player.hasMount) {
+        ctx.save();
+        const mx = player.x + (player.facing === 1 ? -6 : 6);
+        const my = player.y + player.h - 24;
+        ctx.fillStyle = '#D4AC0D';
+        ctx.beginPath();
+        ctx.roundRect(mx, my, 46, 22, 8);
+        ctx.fill();
+        ctx.strokeStyle = '#14081C';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        const headX = player.facing === 1 ? mx + 38 : mx - 8;
+        ctx.fillStyle = '#F39C12';
+        ctx.beginPath();
+        ctx.arc(headX, my - 4, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      if (player.invulnerable % 4 < 2) {
+        ctx.save();
+        const px = player.x;
+        const py = player.y + (player.grounded && Math.abs(player.vx) > 0.5 ? Math.sin(animTick * 0.3) * 2.5 : 0);
+
+        if (player.powerTimer > 0) {
+          ctx.strokeStyle = '#FFC700';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(px + player.w / 2, py + player.h / 2, 34 + Math.sin(animTick * 0.4) * 4, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        const capeSwing = Math.sin(animTick * 0.2) * 5;
+        ctx.fillStyle = '#FF6D00';
+        ctx.beginPath();
+        if (player.facing === 1) {
+          ctx.moveTo(px + 10, py + 20);
+          ctx.lineTo(px - 14, py + 52 + capeSwing);
+          ctx.lineTo(px + 14, py + 52);
+        } else {
+          ctx.moveTo(px + player.w - 10, py + 20);
+          ctx.lineTo(px + player.w + 14, py + 52 + capeSwing);
+          ctx.lineTo(px + player.w - 14, py + 52);
+        }
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(px + 8, py + 44, 9, 14);
+        ctx.fillRect(px + 21, py + 44, 9, 14);
+        ctx.fillStyle = '#7B3F8C';
+        ctx.fillRect(px + 7, py + 54, 11, 4);
+        ctx.fillRect(px + 20, py + 54, 11, 4);
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.roundRect(px + 7, py + 20, 24, 26, 6);
+        ctx.fill();
+        ctx.strokeStyle = '#14081C';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.fillStyle = '#7B3F8C';
+        ctx.fillRect(px + 7, py + 38, 24, 5);
+        ctx.fillStyle = '#FFC700';
+        ctx.beginPath();
+        ctx.arc(px + 19, py + 40.5, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = selectedChar.skin;
+        ctx.beginPath();
+        ctx.arc(px + 19, py + 12, 11, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (selectedChar.helmet) {
+          ctx.fillStyle = '#FFFFFF';
+          ctx.beginPath();
+          ctx.arc(px + 19, py + 10, 12, Math.PI, 0);
+          ctx.fill();
+          ctx.strokeStyle = '#7B3F8C';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        } else {
+          ctx.fillStyle = selectedChar.hair;
+          ctx.beginPath();
+          ctx.arc(px + 19, py + 9, 11.5, Math.PI, 0);
+          ctx.fill();
+        }
+
+        ctx.fillStyle = '#14081C';
+        const eyeX = player.facing === 1 ? px + 21 : px + 11;
+        ctx.fillRect(eyeX, py + 10, 3, 4);
+        ctx.fillRect(eyeX + 5, py + 10, 3, 4);
+
+        ctx.restore();
+      }
+
+      if (player.attackTimer > 0) {
+        const reach = selectedChar.id === 'nina' ? 98 : 84;
+        const startX = player.facing === 1 ? player.x + player.w - 4 : player.x + 4;
+        const endX = startX + player.facing * reach;
+        const wy = player.y + 28;
+
+        ctx.save();
+        ctx.strokeStyle = selectedChar.whipColor;
+        ctx.lineWidth = 6;
+        ctx.shadowColor = selectedChar.whipColor;
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        ctx.moveTo(startX, wy);
+        ctx.quadraticCurveTo((startX + endX) / 2, wy - 14 + (player.attackTimer % 3) * 8, endX, wy);
+        ctx.stroke();
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(endX, wy, 7, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      projectiles.forEach(pr => {
+        ctx.save();
+        ctx.translate(pr.x, pr.y);
+        ctx.rotate(pr.angle);
+        ctx.fillStyle = '#00E5FF';
+        ctx.shadowColor = '#00E5FF';
+        ctx.shadowBlur = 10;
+        ctx.fillRect(-14, -4, 28, 8);
+        ctx.fillRect(-4, -14, 8, 28);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(-10, -2, 20, 4);
+        ctx.fillRect(-2, -10, 4, 20);
+        ctx.restore();
+      });
+
+      particles.forEach(pt => {
+        ctx.fillStyle = pt.color;
+        ctx.fillRect(pt.x, pt.y, 4, 4);
+      });
+
+      floatingTexts.forEach(ft => {
+        ctx.save();
+        ctx.fillStyle = ft.color;
+        ctx.font = '900 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.strokeStyle = '#14081C';
+        ctx.lineWidth = 3;
+        ctx.strokeText(ft.text, ft.x, ft.y);
+        ctx.fillText(ft.text, ft.x, ft.y);
+        ctx.restore();
+      });
+
+      ctx.restore();
+    }
+
+    // =========================================================================
+    // 9. QUIZ DOS GRIMÓRIOS (?), RETORNO AO MENU E FINALIZAÇÃO
+    // =========================================================================
+    function triggerQuiz(block) {
+      gamePaused = true;
+      keys.left = false;
+      keys.right = false;
+      keys.jump = false;
+      keys.down = false;
+
+      const qData = LEVELS[currentLevelIdx].questions[block.qIndex];
+      document.getElementById('quiz-title').textContent = `📖 ${qData.pillar}`;
+      document.getElementById('quiz-knowledge').textContent = qData.knowledge;
+      document.getElementById('quiz-question').textContent = qData.q;
+
+      const optionsEl = document.getElementById('quiz-options');
+      const feedbackEl = document.getElementById('quiz-feedback');
+      const continueBtn = document.getElementById('quiz-continue-btn');
+
+      optionsEl.innerHTML = '';
+      feedbackEl.classList.add('hidden');
+      continueBtn.classList.add('hidden');
+
+      qData.options.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-option';
+        btn.textContent = optText;
+        btn.onclick = () => {
+          block.attempts++;
+          if (idx === qData.correct) {
+            btn.style.background = '#d4edda';
+            btn.style.borderColor = '#28a745';
+            const firstTry = block.attempts === 1;
+            if (firstTry) {
+              perfectAnswers++;
+              combo = Math.min(4, combo + 1);
+            }
+            const pts = (firstTry ? 150 : 80) * combo;
+            score += pts;
+            gainXP(firstTry ? 90 : 50);
+            block.answered = true;
+            playSound('powerup');
+
+            feedbackEl.textContent = firstTry
+              ? `✅ Acerto de 1ª! +${pts} pts (Combo x${combo}) e +90 XP!`
+              : `✅ Resposta correta! +${pts} pts e +50 XP!`;
+            feedbackEl.style.background = '#d4edda';
+            feedbackEl.style.color = '#155724';
+            feedbackEl.classList.remove('hidden');
+
+            Array.from(optionsEl.children).forEach(b => b.disabled = true);
+            continueBtn.classList.remove('hidden');
+
+            if (qBlocks.every(b => b.answered)) {
+              gateBarrier.active = false;
+              portal.open = true;
+              showBanner("🚩 BANDEIRA 30 ANOS LIBERADA! Siga para a direita para avançar!");
+            }
+            updateHUD();
+          } else {
+            combo = 1;
+            btn.style.background = '#f8d7da';
+            btn.style.borderColor = '#dc3545';
+            playSound('hit');
+            feedbackEl.textContent = '⚠️ Ainda não! Releia o trecho da cartilha em destaque acima e tente outra opção.';
+            feedbackEl.style.background = '#f8d7da';
+            feedbackEl.style.color = '#721c24';
+            feedbackEl.classList.remove('hidden');
+            updateHUD();
+          }
+        };
+        optionsEl.appendChild(btn);
+      });
+
+      continueBtn.onclick = () => {
+        document.getElementById('quiz-modal').classList.add('hidden');
+        gamePaused = false;
+      };
+
+      document.getElementById('quiz-modal').classList.remove('hidden');
+    }
+
+    function returnToMenu() {
+      gameRunning = false;
+      gamePaused = false;
+      document.getElementById('quiz-modal').classList.add('hidden');
+      document.getElementById('end-screen').classList.add('hidden');
+      document.getElementById('ranking-modal').classList.add('hidden');
+      document.getElementById('start-screen').classList.remove('hidden');
+    }
+
+    function finishMission() {
+      gameRunning = false;
+      const totalSeconds = Math.floor(elapsedFrames / 60);
+      const timeBonus = Math.max(100, 1200 - totalSeconds * 3);
+      score += timeBonus;
+      const timeStr = formatTime(elapsedFrames);
+
+      const entryId = saveScoreToRanking({
+        name: playerName,
+        unit: playerUnit,
+        hero: selectedChar.name,
+        score: score,
+        time: timeStr
+      });
+
+      document.getElementById('cert-name').textContent = `${playerName} (${playerUnit})`;
+      document.getElementById('cert-hero-badge').textContent = `🦸 ${selectedChar.name}`;
+      document.getElementById('final-score').textContent = score;
+      document.getElementById('final-rpg-level').textContent = rpgLevel;
+      document.getElementById('final-time').textContent = timeStr;
+      document.getElementById('final-time-bonus').textContent = timeBonus;
+      document.getElementById('final-perfect').textContent = `${perfectAnswers}/12`;
+      document.getElementById('copy-toast').classList.add('hidden');
+
+      renderRankingList(document.getElementById('end-ranking-list'), entryId);
+      document.getElementById('end-screen').classList.remove('hidden');
+    }
+
+    // =========================================================================
+    // 10. CONTROLES (TECLADO + TOUCH) E LOOP PRINCIPAL
+    // =========================================================================
+    window.addEventListener('keydown', e => {
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+      if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.down = true;
+      if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+        keys.jump = true;
+        if (gameRunning && !gamePaused) e.preventDefault();
+      }
+      if (e.code === 'KeyJ' || e.code === 'KeyZ' || e.code === 'KeyF') {
+        triggerWhipAttack();
+      }
+      if (e.code === 'KeyK' || e.code === 'KeyE' || e.code === 'KeyX') {
+        triggerSubWeapon();
+      }
+    });
+
+    window.addEventListener('keyup', e => {
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+      if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.down = false;
+      if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') keys.jump = false;
+    });
+
+    function bindTouch(btnId, keyName) {
+      const btn = document.getElementById(btnId);
+      if (!btn) return;
+      const start = (e) => { e.preventDefault(); keys[keyName] = true; };
+      const end = (e) => { e.preventDefault(); keys[keyName] = false; };
+      btn.addEventListener('touchstart', start, { passive: false });
+      btn.addEventListener('touchend', end, { passive: false });
+      btn.addEventListener('mousedown', start);
+      btn.addEventListener('mouseup', end);
+      btn.addEventListener('mouseleave', end);
+    }
+
+    bindTouch('btn-left', 'left');
+    bindTouch('btn-right', 'right');
+    bindTouch('btn-jump', 'jump');
+
+    const atkBtn = document.getElementById('btn-attack');
+    if (atkBtn) {
+      atkBtn.addEventListener('click', e => { e.preventDefault(); triggerWhipAttack(); });
+      atkBtn.addEventListener('touchstart', e => { e.preventDefault(); triggerWhipAttack(); }, { passive: false });
+    }
+
+    const skillBtn = document.getElementById('btn-skill');
+    if (skillBtn) {
+      skillBtn.addEventListener('click', e => { e.preventDefault(); triggerSubWeapon(); });
+      skillBtn.addEventListener('touchstart', e => { e.preventDefault(); triggerSubWeapon(); }, { passive: false });
+    }
+
+    document.getElementById('start-btn').onclick = () => {
+      const nameInput = document.getElementById('player-name-input').value.trim();
+      const unitInput = document.getElementById('player-unit-input').value.trim();
+      const errEl = document.getElementById('form-error');
+
+      if (!nameInput) {
+        errEl.textContent = "⚠️ Por favor, digite seu Nome Completo para entrar no Hall da Fama.";
+        document.getElementById('player-name-input').focus();
+        return;
+      }
+      if (!unitInput) {
+        errEl.textContent = "⚠️ Por favor, informe sua Unidade ou Setor da Rede Comunitá.";
+        document.getElementById('player-unit-input').focus();
+        return;
+      }
+
+      errEl.textContent = "";
+      playerName = nameInput;
+      playerUnit = unitInput;
+
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('end-screen').classList.add('hidden');
+      currentLevelIdx = 0;
+      score = 0;
+      combo = 1;
+      perfectAnswers = 0;
+      elapsedFrames = 0;
+      hp = 100;
+      maxHp = 100;
+      mp = 100;
+      maxMp = 100;
+      xp = 0;
+      rpgLevel = 1;
+      player.hasMount = false;
+      player.powerTimer = 0;
+      initLevel(0);
+      gameRunning = true;
+    };
+
+    document.getElementById('menu-btn').onclick = returnToMenu;
+    document.getElementById('end-menu-btn').onclick = returnToMenu;
+
+    document.getElementById('restart-btn').onclick = () => {
+      document.getElementById('end-screen').classList.add('hidden');
+      currentLevelIdx = 0;
+      score = 0;
+      combo = 1;
+      perfectAnswers = 0;
+      elapsedFrames = 0;
+      hp = 100;
+      mp = 100;
+      xp = 0;
+      rpgLevel = 1;
+      player.hasMount = false;
+      player.powerTimer = 0;
+      initLevel(0);
+      gameRunning = true;
+    };
+
+    document.getElementById('open-ranking-btn').onclick = () => {
+      renderRankingList(document.getElementById('modal-ranking-list'));
+      document.getElementById('ranking-modal').classList.remove('hidden');
+    };
+
+    document.getElementById('close-ranking-btn').onclick = () => {
+      document.getElementById('ranking-modal').classList.add('hidden');
+    };
+
+    document.getElementById('share-score-btn').onclick = () => {
+      const timeStr = formatTime(elapsedFrames);
+      const shareText =
+        `⚔️ *MISSÃO COMUNITÁ — CIDADELA 2D RPG (30 ANOS)* 🏆\n` +
+        `👤 Agente: *${playerName}* (${playerUnit})\n` +
+        `🦸 Guardião: ${selectedChar.name} (Nível RPG ${rpgLevel})\n` +
+        `⭐ Score Final: *${score} pts*\n` +
+        `🎯 Acertos de 1ª: ${perfectAnswers}/12 | 🧩 Puzzles: 4/4 | ⏱️ Tempo: ${timeStr}\n` +
+        `Quem da Rede Comunitá consegue bater meu recorde? 🚀`;
+
+      const tempArea = document.createElement('textarea');
+      tempArea.value = shareText;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      try {
+        document.execCommand('copy');
+        document.getElementById('copy-toast').classList.remove('hidden');
+      } catch (e) {}
+      document.body.removeChild(tempArea);
+    };
+
+    function gameLoop() {
+      update2D();
+      draw2D();
+      requestAnimationFrame(gameLoop);
+    }
+
+    window.onload = function () {
+      renderCharSelector();
+      initLevel(0);
+      gameLoop();
+    };
+  </script>
+</body>
+</html>

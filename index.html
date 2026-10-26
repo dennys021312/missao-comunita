@@ -468,34 +468,114 @@
     }
     table.ranking th { color: var(--persia-gold); }
 
-    @media (max-width: 680px) {
+    /* BANNER DE ORIENTAÇÃO HORIZONTAL E MODO TELA CHEIA TOTAL */
+    .rotate-notice {
+      display: none;
+      background: linear-gradient(90deg, #54216b, #9e1b24);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 6px 12px;
+      text-align: center;
+      border-bottom: 2px solid var(--persia-gold);
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    :fullscreen body,
+    :-webkit-full-screen body {
+      padding: 0;
+      width: 100vw;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    :fullscreen .shell,
+    :-webkit-full-screen .shell {
+      max-width: 100vw;
+      width: 100vw;
+      height: 100dvh;
+      margin: 0;
+    }
+
+    :fullscreen .game-frame,
+    :-webkit-full-screen .game-frame {
+      border: 0;
+      outline: 0;
+      border-radius: 0;
+      width: 100vw;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    :fullscreen .screen,
+    :-webkit-full-screen .screen {
+      flex: 1;
+      height: 100dvh;
+      overflow-y: auto;
+    }
+
+    :fullscreen #play,
+    :-webkit-full-screen #play {
+      display: flex;
+      flex-direction: column;
+      width: 100vw;
+      height: 100dvh;
+    }
+
+    :fullscreen .stage-wrap,
+    :-webkit-full-screen .stage-wrap {
+      flex: 1;
+      aspect-ratio: auto;
+      height: calc(100dvh - 40px);
+      max-height: none;
+    }
+
+    @media (max-width: 920px) and (orientation: portrait) {
+      .rotate-notice { display: flex; }
+    }
+
+    @media (max-width: 960px) and (orientation: landscape), (max-width: 680px) {
       body { padding: 0; }
-      .game-frame { border-radius: 0; border: 0; min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; }
-      .stage-wrap { aspect-ratio: auto; height: calc(100dvh - 46px); max-height: none; }
+      .shell { max-width: 100vw; width: 100vw; height: 100dvh; margin: 0; }
+      .game-frame { border-radius: 0; border: 0; outline: 0; width: 100vw; height: 100dvh; display: flex; flex-direction: column; }
+      .screen { flex: 1; min-height: 100dvh; padding: 12px 16px; overflow-y: auto; }
+      #play { display: flex; flex-direction: column; width: 100vw; height: 100dvh; }
+      .hud { padding: 4px 10px; font-size: 10.5px; }
+      .stage-wrap { flex: 1; aspect-ratio: auto; height: calc(100dvh - 38px); max-height: none; }
     }
   </style>
 </head>
 <body>
 <div class="shell">
   <main class="game-frame">
+    <!-- AVISO INTERATIVO PARA CELULAR NA VERTICAL -->
+    <div class="rotate-notice" id="rotate-banner">
+      <span>📱 Para a melhor experiência, jogue com o celular na <strong>Horizontal</strong>!</span>
+      <button class="btn primary" id="btn-force-landscape" style="padding:4px 10px; font-size:11px;">⛶ Girar e Tela Cheia</button>
+    </div>
+
     <!-- TELA 1: CAPA -->
     <section id="home" class="screen">
       <span class="eyebrow">✦ Edição Prince of Persia • 30 Anos Rede Comunitá</span>
       <h1>Missão <em>Comunitá</em>: As Areias do Saber</h1>
       <p class="sub">
-        Explore o Templo da Cidadela com gráficos inspirados no clássico <strong>Prince of Persia</strong>! Escale paredes com saltos acrobáticos (<em>Wall Jump</em>), empurre blocos de pedra sobre placas de pressão, puxe alavancas, beba nas Fontes da Empatia e responda aos Grimórios das 4 Cartilhas.
+        Explore o Templo da Cidadela com gráficos inspirados no clássico <strong>Prince of Persia</strong>! Escale paredes com saltos acrobáticos (<em>Wall Jump</em>), empurre blocos de pedra sobre placas de pressão, derrote os Guardiões Sombrios da antiética e responda aos Grimórios das 4 Cartilhas.
       </p>
 
       <div class="feature-pills">
         <span class="feature-pill">🧗 Salto na Parede (Wall Jump)</span>
         <span class="feature-pill">🪨 Puzzles de Blocos e Placas</span>
-        <span class="feature-pill">⛲ Fontes de Água Curativas</span>
-        <span class="feature-pill">⚔️ Lâminas, Alavancas e Guardas</span>
+        <span class="feature-pill">👹 Inimigos com Personalidade e Armas</span>
+        <span class="feature-pill">📱 Tela Cheia Horizontal Automática</span>
         <span class="feature-pill">🎮 Controles Game Boy 30% Transparentes</span>
       </div>
 
       <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
-        <button class="btn primary" id="btn-go-setup">▶ Entrar no Templo</button>
+        <button class="btn primary" id="btn-go-setup">▶ Entrar no Templo (Tela Cheia)</button>
+        <button class="btn secondary" id="btn-home-fullscreen">⛶ Tela Cheia Horizontal</button>
         <button class="btn secondary" id="btn-go-ranking">🏆 Hall da Fama</button>
       </div>
     </section>
@@ -539,6 +619,7 @@
           <div class="stat-pill">SCORE: <strong id="hud-score">0</strong></div>
         </div>
         <div style="display:flex; gap:6px;">
+          <button class="btn secondary" id="btn-hud-fullscreen" style="padding:3px 8px; font-size:11px;" title="Alternar Tela Cheia Horizontal">⛶ Tela</button>
           <button class="btn secondary" id="btn-reset-room" style="padding:3px 8px; font-size:11px;" title="Reiniciar posição na fase">🔄 Sala</button>
           <button class="btn secondary" id="btn-quit" style="padding:3px 8px; font-size:11px;">🏠 Menu</button>
         </div>
@@ -855,6 +936,228 @@ function drawPrinceHero(g, x, y, hData, facing, tick, wallSlide, mounted, starAc
   g.restore();
 }
 
+// DESENHA INIMIGOS COM PERSONALIDADE ÚNICA, EXPRESSÕES, ARMAS E BALÕES DE FALA
+function drawEnemyWithPersonality(g, e, tick) {
+  const dir = e.vx >= 0 ? 1 : -1;
+  const distToPlayer = Math.hypot((player.x + 15) - (e.x + e.w / 2), (player.y + 24) - (e.y + e.h / 2));
+  const isAlert = distToPlayer < 190;
+  const walkSwing = Math.sin(tick * 0.28 + e.x * 0.05) * 4;
+  const bob = Math.abs(Math.sin(tick * 0.28)) * 2;
+
+  g.save();
+  g.translate(Math.floor(e.x), Math.floor(e.y));
+
+  // Sombra no chão
+  g.fillStyle = 'rgba(0,0,0,0.38)';
+  g.beginPath();
+  g.ellipse(e.w / 2, e.h, 16, 4, 0, 0, Math.PI * 2);
+  g.fill();
+
+  g.save();
+  if (dir === -1) {
+    g.translate(e.w, 0);
+    g.scale(-1, 1);
+  }
+
+  if (e.archetype === 'fofoca') {
+    // ARQUÉTIPO 1: VIZIR DA FOFOCA (Manto verde-veneno, postura curvada sorrateira, pergaminho de boatos e nuvem tóxica)
+    g.fillStyle = 'rgba(82, 255, 0, 0.16)';
+    g.beginPath();
+    g.arc(16, 24, 22 + Math.sin(tick * 0.15) * 3, 0, Math.PI * 2);
+    g.fill();
+
+    // Pernas e sapatos curvados persas
+    g.fillStyle = '#1f3824';
+    g.fillRect(8, 34, 6, 10 + walkSwing * 0.4);
+    g.fillRect(18, 34, 6, 10 - walkSwing * 0.4);
+    g.fillStyle = '#73d13d';
+    g.fillRect(10, 42 + walkSwing * 0.4, 8, 4);
+    g.fillRect(20, 42 - walkSwing * 0.4, 8, 4);
+
+    // Túnica sombria esmeralda com borda dourada
+    g.fillStyle = '#1b4332';
+    g.beginPath();
+    g.moveTo(4, 38);
+    g.lineTo(8, 12 + bob);
+    g.lineTo(26, 14 + bob);
+    g.lineTo(29, 38);
+    g.closePath();
+    g.fill();
+    g.fillStyle = '#95d5b2';
+    g.fillRect(15, 14 + bob, 3, 22);
+
+    // Cabeça corcunda + Turbante de Espião com pena
+    g.fillStyle = '#c29b78';
+    g.fillRect(12, 5 + bob, 13, 11);
+    g.fillStyle = '#2d6a4f';
+    g.fillRect(9, 0 + bob, 18, 7);
+    g.fillStyle = '#b7e4c7';
+    g.fillRect(21, -4 + bob, 3, 5);
+
+    // Olhos maliciosos amarelos e sorriso sarcástico
+    g.fillStyle = '#ffeb3b';
+    g.fillRect(17, 8 + bob, 3, 3);
+    g.fillRect(22, 8 + bob, 3, 3);
+    g.fillStyle = '#111';
+    g.fillRect(17, 13 + bob, 6, 2);
+
+    // Mão segurando Cajado de Serpente / Pergaminho de Boato
+    const staffWave = isAlert ? Math.sin(tick * 0.5) * 6 : 0;
+    g.strokeStyle = '#d4a24c';
+    g.lineWidth = 3;
+    g.beginPath();
+    g.moveTo(26, 36);
+    g.lineTo(30, 8 + staffWave);
+    g.stroke();
+    g.fillStyle = '#52ff00';
+    g.beginPath();
+    g.arc(30, 7 + staffWave, 4, 0, Math.PI * 2);
+    g.fill();
+
+  } else if (e.archetype === 'intolerancia') {
+    // ARQUÉTIPO 2: BRUTAMONTES DA INTOLERÂNCIA (Armadura pesada carmesim, elmo com chifres e Cimitarra Gigante)
+    // Capa vermelha rasgada
+    g.fillStyle = '#780000';
+    g.beginPath();
+    g.moveTo(6, 12 + bob);
+    g.lineTo(-6 - Math.abs(walkSwing), 38);
+    g.lineTo(10, 36);
+    g.closePath();
+    g.fill();
+
+    // Botas encouraçadas
+    g.fillStyle = '#2b2d42';
+    g.fillRect(7, 32, 8, 12 + walkSwing * 0.5);
+    g.fillRect(18, 32, 8, 12 - walkSwing * 0.5);
+
+    // Peitoral de aço e bronze
+    g.fillStyle = '#3d405b';
+    g.fillRect(5, 13 + bob, 23, 21);
+    g.fillStyle = '#f4a261';
+    g.fillRect(7, 16 + bob, 19, 4);
+    g.fillRect(14, 14 + bob, 5, 19);
+
+    // Elmo Persa com Chifres Dourados
+    g.fillStyle = '#1d1e2c';
+    g.fillRect(8, 2 + bob, 17, 12);
+    g.fillStyle = '#f5b932';
+    g.beginPath();
+    g.moveTo(8, 6 + bob); g.lineTo(2, -3 + bob); g.lineTo(11, 3 + bob);
+    g.moveTo(25, 6 + bob); g.lineTo(31, -3 + bob); g.lineTo(22, 3 + bob);
+    g.fill();
+
+    // Olhos vermelhos furiosos com sobrancelha franzida
+    g.fillStyle = '#ff2a2a';
+    g.fillRect(14, 7 + bob, 4, 3);
+    g.fillRect(20, 7 + bob, 4, 3);
+
+    // Cimitarra Pesada / Machado que golpeia quando o jogador chega perto
+    g.save();
+    g.translate(25, 20 + bob);
+    g.rotate(isAlert ? Math.sin(tick * 0.45) * 0.85 : 0.25);
+    g.fillStyle = '#8d5524';
+    g.fillRect(0, -2, 10, 4);
+    g.fillStyle = '#e0e6ed';
+    g.beginPath();
+    g.moveTo(6, -2);
+    g.quadraticCurveTo(22, -14, 18, 8);
+    g.lineTo(6, 3);
+    g.closePath();
+    g.fill();
+    g.restore();
+
+  } else if (e.archetype === 'capacitismo') {
+    // ARQUÉTIPO 3: GOLEM DO CAPACITISMO / BARREIRA (Guarda de pedra maciça com Escudo de Bloqueio na frente)
+    // Pernas de rocha
+    g.fillStyle = '#4a5759';
+    g.fillRect(7, 32, 8, 12 + walkSwing * 0.3);
+    g.fillRect(18, 32, 8, 12 - walkSwing * 0.3);
+
+    // Corpo monolítico de pedra com rachaduras luminosas
+    g.fillStyle = '#6b705c';
+    g.fillRect(4, 10 + bob, 24, 24);
+    g.strokeStyle = '#cb997e';
+    g.lineWidth = 2;
+    g.strokeRect(4, 10 + bob, 24, 24);
+
+    // Cabeça quadrada de estátua com visor laranja
+    g.fillStyle = '#3f4238';
+    g.fillRect(8, 1 + bob, 16, 11);
+    g.fillStyle = '#ff9f1c';
+    g.fillRect(12, 5 + bob, 11, 3);
+
+    // Escudo Torre Pesado ("BARREIRA") segurado na frente
+    const shieldPush = isAlert ? 4 : 0;
+    g.fillStyle = '#2b2d42';
+    g.fillRect(22 + shieldPush, 8 + bob, 10, 32);
+    g.strokeStyle = '#f5b932';
+    g.lineWidth = 2;
+    g.strokeRect(22 + shieldPush, 8 + bob, 10, 32);
+    // Símbolo de bloqueio no escudo
+    g.fillStyle = '#e74c3c';
+    g.fillRect(25 + shieldPush, 20 + bob, 4, 8);
+
+  } else {
+    // ARQUÉTIPO 4: ESPECTRO DO ASSÉDIO / OMISSÃO (Sombra flutuante roxo-escura com coroa de chamas e adagas duplas)
+    const floatY = Math.sin(tick * 0.18) * 4;
+    // Cauda de fumaça sombria em vez de pernas
+    g.fillStyle = 'rgba(74, 20, 140, 0.78)';
+    g.beginPath();
+    g.moveTo(6, 26 + floatY);
+    g.quadraticCurveTo(16, 48 + walkSwing, 26, 26 + floatY);
+    g.closePath();
+    g.fill();
+
+    // Manto real corrompido
+    g.fillStyle = '#311b92';
+    g.fillRect(6, 11 + floatY, 20, 20);
+    g.fillStyle = '#f5b932';
+    g.fillRect(6, 11 + floatY, 20, 3);
+
+    // Capuz sombrio com olhos magenta brilhantes
+    g.fillStyle = '#12005e';
+    g.fillRect(8, 1 + floatY, 16, 12);
+    g.fillStyle = '#ff4081';
+    g.fillRect(13, 6 + floatY, 4, 3);
+    g.fillRect(19, 6 + floatY, 4, 3);
+
+    // Adagas sombrias duplas girando
+    const bladeOffset = Math.sin(tick * 0.4) * 5;
+    g.fillStyle = '#ff80ab';
+    g.fillRect(24, 16 + floatY + bladeOffset, 11, 3);
+    g.fillRect(22, 24 + floatY - bladeOffset, 11, 3);
+  }
+
+  g.restore();
+
+  // Barra de HP estilizada acima do inimigo
+  g.fillStyle = 'rgba(10, 16, 24, 0.85)';
+  g.fillRect(0, -12, e.w, 5);
+  g.fillStyle = e.hp > e.maxHp * 0.4 ? '#2ecc71' : '#e74c3c';
+  g.fillRect(1, -11, Math.max(0, (e.hp / e.maxHp) * (e.w - 2)), 3);
+
+  // Nome do Inimigo
+  g.fillStyle = '#fff';
+  g.font = 'bold 10px sans-serif';
+  g.textAlign = 'center';
+  g.fillText(e.name, e.w / 2, -16);
+
+  // Balão de Personalidade / Alerta quando o Herói se aproxima!
+  if (isAlert && e.taunt) {
+    const bubbleW = Math.max(92, e.taunt.length * 5.5);
+    g.fillStyle = 'rgba(22, 36, 50, 0.92)';
+    g.fillRect(e.w / 2 - bubbleW / 2, -38, bubbleW, 16);
+    g.strokeStyle = '#f5b932';
+    g.lineWidth = 1.5;
+    g.strokeRect(e.w / 2 - bubbleW / 2, -38, bubbleW, 16);
+    g.fillStyle = '#f5b932';
+    g.font = 'bold 9.5px sans-serif';
+    g.fillText('⚠️ ' + e.taunt, e.w / 2, -27);
+  }
+
+  g.restore();
+}
+
 function buildStage() {
   player.x = 55; player.y = 370; player.vx = 0; player.vy = 0;
   player.wallSlide = 0; player.starTimer = 0;
@@ -973,12 +1276,35 @@ function buildStage() {
     { x: 2110, y: 170, got: false, qIdx: 2 }
   ];
 
-  // Guardas Sombrios (Comportamentos Antiéticos)
-  const enemyNames = ['Fofoca', 'Conflito', 'Capacitismo', 'Assédio'];
+  // Guardas Sombrios com Arquétipos Visuais, Velocidades e Falas de Personalidade
+  const stageThemes = [
+    [
+      { name: 'Vizir da Fofoca', archetype: 'fofoca', taunt: 'Espalho boatos mesmo!' },
+      { name: 'Guarda do Individualismo', archetype: 'intolerancia', taunt: 'Cada um por si!' },
+      { name: 'Espectro da Omissão', archetype: 'assedio', taunt: 'Não é problema meu!' }
+    ],
+    [
+      { name: 'Mercador do Conflito', archetype: 'fofoca', taunt: 'Aceite este suborno!' },
+      { name: 'Bruto do Desperdício', archetype: 'intolerancia', taunt: 'Não cuido do patrimônio!' },
+      { name: 'Sombra da Quebra de Sigilo', archetype: 'assedio', taunt: 'Vou vazar os dados!' }
+    ],
+    [
+      { name: 'Golem do Capacitismo', archetype: 'capacitismo', taunt: 'Aqui há barreiras!' },
+      { name: 'Guarda da Segregação', archetype: 'intolerancia', taunt: 'Não trabalho junto!' },
+      { name: 'Vizir do Preconceito', archetype: 'fofoca', taunt: 'Julgo sem conhecer!' }
+    ],
+    [
+      { name: 'Tirano do Assédio Moral', archetype: 'intolerancia', taunt: 'Humilho todo dia!' },
+      { name: 'Espectro da Intimidação', archetype: 'assedio', taunt: 'Não aceito um NÃO!' },
+      { name: 'Golem do Silêncio', archetype: 'capacitismo', taunt: 'Ninguém vai denunciar!' }
+    ]
+  ];
+  const currTheme = stageThemes[stageIdx];
+
   enemies = [
-    { x: 800, minX: 700, maxX: 960, y: GROUND_Y - 46, w: 32, h: 46, vx: 1.5, hp: 50, maxHp: 50, name: enemyNames[stageIdx] },
-    { x: 1260, minX: 1150, maxX: 1370, y: 294, w: 32, h: 46, vx: -1.6, hp: 60, maxHp: 60, name: 'Intolerância' },
-    { x: 1960, minX: 1850, maxX: 2070, y: GROUND_Y - 46, w: 34, h: 46, vx: 1.7, hp: 75, maxHp: 75, name: 'Omissão' }
+    { x: 800, minX: 700, maxX: 960, y: GROUND_Y - 46, w: 34, h: 46, vx: 1.55, hp: 55, maxHp: 55, ...currTheme[0] },
+    { x: 1260, minX: 1150, maxX: 1370, y: 294, w: 34, h: 46, vx: -1.65, hp: 65, maxHp: 65, ...currTheme[1] },
+    { x: 1960, minX: 1850, maxX: 2070, y: GROUND_Y - 46, w: 36, h: 46, vx: 1.75, hp: 80, maxHp: 80, ...currTheme[2] }
   ];
 
   powerups = [];
@@ -1557,26 +1883,10 @@ function renderScene() {
     ctx.fillText('?', g.x + 17, gy + 25);
   });
 
-  // 11. Guardas Sombrios
+  // 11. Guardas Sombrios com Personalidade, Armas e Falas Temáticas
   enemies.forEach(e => {
     if (e.hp <= 0) return;
-    ctx.fillStyle = '#3a1738';
-    ctx.fillRect(e.x + 4, e.y + 10, e.w - 8, e.h - 10);
-    // Turbante e olhos brilhantes
-    ctx.fillStyle = '#9e1b24';
-    ctx.fillRect(e.x + 2, e.y, e.w - 4, 11);
-    ctx.fillStyle = '#ffeb3b';
-    ctx.fillRect(e.x + 7, e.y + 13, 5, 4);
-    ctx.fillRect(e.x + 19, e.y + 13, 5, 4);
-    // Barra de vida
-    ctx.fillStyle = '#111';
-    ctx.fillRect(e.x, e.y - 9, e.w, 4);
-    ctx.fillStyle = '#2ecc71';
-    ctx.fillRect(e.x, e.y - 9, (e.hp / e.maxHp) * e.w, 4);
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 10px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(e.name, e.x + e.w / 2, e.y - 13);
+    drawEnemyWithPersonality(ctx, e, player.animTick);
   });
 
   // 12. Portal Persa Final da Fase
@@ -1865,14 +2175,51 @@ function initHeroCards() {
   });
 }
 
+// FUNÇÃO DE TELA CHEIA E ROTAÇÃO HORIZONTAL (LANDSCAPE) AUTOMÁTICA
+async function requestLandscapeFullscreen(forceToggle = false) {
+  try {
+    const docEl = document.documentElement;
+    const isFull = document.fullscreenElement || document.webkitFullscreenElement;
+
+    if (!isFull) {
+      if (docEl.requestFullscreen) {
+        await docEl.requestFullscreen();
+      } else if (docEl.webkitRequestFullscreen) {
+        await docEl.webkitRequestFullscreen();
+      }
+    } else if (forceToggle) {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        await document.webkitExitFullscreen();
+      }
+      return;
+    }
+
+    // Trava a tela na horizontal (Landscape) em dispositivos móveis compatíveis
+    if (screen.orientation && screen.orientation.lock) {
+      await screen.orientation.lock('landscape').catch(() => {});
+    }
+  } catch (err) {
+    // Caso o navegador ou iframe restrinja Fullscreen, o layout responsivo CSS assume 100% da janela
+  }
+}
+
 // EVENTOS DE NAVEGAÇÃO
-$('btn-go-setup').onclick = () => showScreen('setup');
+$('btn-go-setup').onclick = () => {
+  requestLandscapeFullscreen(false);
+  showScreen('setup');
+};
+$('btn-home-fullscreen').onclick = () => requestLandscapeFullscreen(true);
+$('btn-hud-fullscreen').onclick = () => requestLandscapeFullscreen(true);
+$('btn-force-landscape').onclick = () => requestLandscapeFullscreen(false);
 $('btn-setup-back').onclick = () => showScreen('home');
 $('btn-go-ranking').onclick = () => { renderRankTable($('standalone-ranking-box')); showScreen('ranking-screen'); };
 $('btn-rank-back').onclick = () => showScreen('home');
 $('btn-rank-clear').onclick = () => { localStorage.removeItem('comunita_persia_rank_v2'); renderRankTable($('standalone-ranking-box')); };
 
 $('btn-start-play').onclick = () => {
+  requestLandscapeFullscreen(false);
   playerName = $('inp-name').value.trim() || 'Guardião Comunitá';
   playerUnit = $('inp-unit').value.trim() || 'Rede Comunitá';
   stageIdx = 0; score = 0; hp = 100; mp = 50; xp = 0; rpgLvl = 1; firstTryCount = 0; elapsedSec = 0;

@@ -562,20 +562,22 @@
       <span class="eyebrow">✦ Edição Prince of Persia • 30 Anos Rede Comunitá</span>
       <h1>Missão <em>Comunitá</em>: As Areias do Saber</h1>
       <p class="sub">
-        Explore o Templo da Cidadela com gráficos inspirados no clássico <strong>Prince of Persia</strong>! Escale paredes com saltos acrobáticos (<em>Wall Jump</em>), empurre blocos de pedra sobre placas de pressão, derrote os Guardiões Sombrios da antiética e responda aos Grimórios das 4 Cartilhas.
+        Uma jornada em <strong>4 Fases com Jogabilidades Únicas</strong> no Templo da Cidadela! Domine acrobacias e puzzles na Fase 1, escale os elevadores móveis na Fase 2, pilote o <strong>Carrinho Real nos Trilhos</strong> na Fase 3 e capture os símbolos de respeito na <strong>Arena da Ouvidoria</strong> na Fase 4!
       </p>
 
       <div class="feature-pills">
-        <span class="feature-pill">🧗 Salto na Parede (Wall Jump)</span>
-        <span class="feature-pill">🪨 Puzzles de Blocos e Placas</span>
-        <span class="feature-pill">👹 Inimigos com Personalidade e Armas</span>
-        <span class="feature-pill">📱 Tela Cheia Horizontal Automática</span>
+        <span class="feature-pill">🧗 Fase 1: Acrobacias & Puzzles</span>
+        <span class="feature-pill">🛗 Fase 2: Labirinto de Elevadores</span>
+        <span class="feature-pill">🚋 Fase 3: Corrida de Carrinho</span>
+        <span class="feature-pill">🛡️ Fase 4: Pegar Itens & Defesa</span>
+        <span class="feature-pill">🎵 4 Trilhas Sonoras Dinâmicas</span>
         <span class="feature-pill">🎮 Controles Game Boy 30% Transparentes</span>
       </div>
 
       <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
         <button class="btn primary" id="btn-go-setup">▶ Entrar no Templo (Tela Cheia)</button>
         <button class="btn secondary" id="btn-home-fullscreen">⛶ Tela Cheia Horizontal</button>
+        <button class="btn secondary" id="btn-home-sound">🔊 Som: ON</button>
         <button class="btn secondary" id="btn-go-ranking">🏆 Hall da Fama</button>
       </div>
     </section>
@@ -619,6 +621,7 @@
           <div class="stat-pill">SCORE: <strong id="hud-score">0</strong></div>
         </div>
         <div style="display:flex; gap:6px;">
+          <button class="btn secondary" id="btn-hud-sound" style="padding:3px 8px; font-size:11px;" title="Ativar/Desativar Música e Efeitos">🔊 Som</button>
           <button class="btn secondary" id="btn-hud-fullscreen" style="padding:3px 8px; font-size:11px;" title="Alternar Tela Cheia Horizontal">⛶ Tela</button>
           <button class="btn secondary" id="btn-reset-room" style="padding:3px 8px; font-size:11px;" title="Reiniciar posição na fase">🔄 Sala</button>
           <button class="btn secondary" id="btn-quit" style="padding:3px 8px; font-size:11px;">🏠 Menu</button>
@@ -712,7 +715,348 @@
 'use strict';
 const $ = id => document.getElementById(id);
 const screens = ['home', 'setup', 'play', 'quiz', 'results', 'ranking-screen'];
-function showScreen(id) { screens.forEach(s => $(s).classList.toggle('hidden', s !== id)); }
+
+// ============================================================================
+// MOTOR DE ÁUDIO 16-BIT & TRILHA SONORA PERSA (WEB AUDIO API SEM ARQUIVOS EXTERNOS)
+// ============================================================================
+const SoundEngine = (() => {
+  let actx = null;
+  let muted = false;
+  let currentTheme = 'none';
+  let seqTimer = null;
+  let stepIdx = 0;
+
+  // Escala Persa / Hijaz (D, Eb, F#, G, A, Bb, C, D5, Eb5, F#5, G5, A5)
+  const N = {
+    G2: 98.00, A2: 110.00, Bb2: 116.54, C3: 130.81, D3: 146.83, Eb3: 155.56, F3s: 185.00, G3: 196.00, A3: 220.00,
+    D4: 293.66, Eb4: 311.13, F4s: 369.99, G4: 392.00, A4: 440.00, Bb4: 466.16, C5: 523.25,
+    D5: 587.33, Eb5: 622.25, F5s: 739.99, G5: 783.99, A5: 880.00
+  };
+
+  function init() {
+    if (!actx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) actx = new AudioCtx();
+    }
+    if (actx && actx.state === 'suspended') {
+      actx.resume().catch(() => {});
+    }
+  }
+
+  function playTone(freq, type, duration, vol = 0.15, slideTo = null, delay = 0) {
+    if (muted || !actx || !freq) return;
+    try {
+      const t0 = actx.currentTime + delay;
+      const osc = actx.createOscillator();
+      const gain = actx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, t0);
+      if (slideTo) {
+        osc.frequency.exponentialRampToValueAtTime(Math.max(20, slideTo), t0 + duration);
+      }
+      gain.gain.setValueAtTime(0.001, t0);
+      gain.gain.linearRampToValueAtTime(vol, t0 + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+      osc.connect(gain);
+      gain.connect(actx.destination);
+      osc.start(t0);
+      osc.stop(t0 + duration + 0.02);
+    } catch {}
+  }
+
+  function playNoise(duration, vol = 0.12, filterFreq = 1200, delay = 0) {
+    if (muted || !actx) return;
+    try {
+      const t0 = actx.currentTime + delay;
+      const bufSize = Math.max(1, Math.floor(actx.sampleRate * duration));
+      const buffer = actx.createBuffer(1, bufSize, actx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+
+      const noise = actx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = actx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(filterFreq, t0);
+
+      const gain = actx.createGain();
+      gain.gain.setValueAtTime(vol, t0);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + duration);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(actx.destination);
+      noise.start(t0);
+      noise.stop(t0 + duration + 0.02);
+    } catch {}
+  }
+
+  // Sequências musicais (Melodia + Baixo + Percussão Darbuka)
+  const MENU_MELODY = [
+    N.D4, 0, N.Eb4, N.F4s, N.G4, 0, N.A4, N.Bb4,
+    N.A4, N.G4, N.F4s, N.Eb4, N.D4, 0, N.A3, 0,
+    N.D4, N.F4s, N.G4, N.A4, N.Bb4, N.A4, N.G4, N.F4s,
+    N.Eb4, N.G4, N.F4s, N.Eb4, N.D4, 0, N.D4, 0
+  ];
+  const MENU_BASS = [
+    N.D3, 0, N.A2, 0, N.D3, 0, N.G2, 0,
+    N.D3, 0, N.A2, 0, N.D3, 0, N.D3, 0
+  ];
+
+  const ACTION_MELODY = [
+    N.D5, N.A4, N.Bb4, N.A4, N.G4, N.F4s, N.G4, N.A4,
+    N.D5, N.C5, N.Bb4, N.A4, N.G4, N.F4s, N.Eb4, N.F4s,
+    N.G4, N.A4, N.Bb4, N.C5, N.D5, N.Eb5, N.D5, N.C5,
+    N.Bb4, N.A4, N.G4, N.F4s, N.Eb4, N.F4s, N.D4, 0
+  ];
+  const ACTION_BASS = [
+    N.D3, N.D3, N.A2, N.D3, N.G2, N.G2, N.A2, N.A2,
+    N.Bb2, N.Bb2, N.C3, N.C3, N.G2, N.A2, N.D3, N.D3
+  ];
+
+  const QUIZ_MELODY = [
+    N.A4, 0, N.F4s, 0, N.G4, 0, N.Eb4, 0,
+    N.D4, 0, N.F4s, 0, N.A4, 0, 0, 0
+  ];
+
+  // FASE 2: Labirinto Misterioso das Câmaras de Ética (Arpejos hipnóticos e graves profundos)
+  const STAGE2_MELODY = [
+    N.D4, N.F4s, N.A4, 0, N.Eb4, N.G4, N.Bb4, 0,
+    N.F4s, N.A4, N.C5, N.Bb4, N.A4, N.G4, N.F4s, N.Eb4,
+    N.D4, 0, N.A3, N.D4, N.F4s, 0, N.G4, N.A4,
+    N.Bb4, N.A4, N.G4, N.F4s, N.Eb4, N.D4, N.A3, 0
+  ];
+  const STAGE2_BASS = [
+    N.D3, 0, N.D3, N.A2, N.Eb3, 0, N.Eb3, N.Bb2,
+    N.C3, 0, N.G2, 0, N.D3, N.A2, N.D3, 0
+  ];
+
+  // FASE 3: Corrida de Carrinho nos Trilhos (Ritmo acelerado e adrenalina nos trilhos!)
+  const STAGE3_MELODY = [
+    N.D5, N.D5, N.Eb5, N.F5s, N.G5, N.F5s, N.Eb5, N.D5,
+    N.C5, N.Bb4, N.A4, N.G4, N.F4s, N.G4, N.A4, N.Bb4,
+    N.D5, N.A4, N.D5, N.F5s, N.G5, N.F5s, N.Eb5, N.C5,
+    N.D5, N.C5, N.Bb4, N.A4, N.G4, N.F4s, N.Eb4, N.D4
+  ];
+  const STAGE3_BASS = [
+    N.D3, N.A2, N.D3, N.A2, N.G2, N.D3, N.G2, N.D3,
+    N.Bb2, N.F3s, N.C3, N.G3, N.D3, N.A2, N.D3, N.D3
+  ];
+
+  // FASE 4: Arena do Santuário — Pegar Itens & Combate (Tema heroico urgente de clímax!)
+  const STAGE4_MELODY = [
+    N.A4, N.D5, N.F5s, N.D5, N.G5, N.F5s, N.Eb5, N.D5,
+    N.Bb4, N.D5, N.G5, N.F5s, N.Eb5, N.D5, N.C5, N.Bb4,
+    N.A4, N.C5, N.Eb5, N.F5s, N.G5, N.A5, N.G5, N.F5s,
+    N.Eb5, N.D5, N.C5, N.Bb4, N.A4, N.F4s, N.D4, 0
+  ];
+  const STAGE4_BASS = [
+    N.D3, N.D3, N.F3s, N.G3, N.A3, N.A3, N.Bb2, N.A2,
+    N.G2, N.G2, N.C3, N.C3, N.D3, N.A2, N.D3, N.D3
+  ];
+
+  function tickMusic() {
+    if (muted || !actx || currentTheme === 'none') return;
+
+    if (currentTheme === 'menu') {
+      const m = MENU_MELODY[stepIdx % MENU_MELODY.length];
+      const b = MENU_BASS[stepIdx % MENU_BASS.length];
+      if (m) playTone(m, 'triangle', 0.24, 0.065);
+      if (b) playTone(b, 'sine', 0.28, 0.08);
+      if (stepIdx % 4 === 0) playTone(95, 'sine', 0.09, 0.07, 45);
+      if (stepIdx % 4 === 2) playNoise(0.05, 0.025, 2400);
+      stepIdx++;
+    } else if (currentTheme === 'stage1') {
+      const m = ACTION_MELODY[stepIdx % ACTION_MELODY.length];
+      const b = ACTION_BASS[stepIdx % ACTION_BASS.length];
+      if (m) playTone(m, 'square', 0.15, 0.042);
+      if (b) playTone(b, 'triangle', 0.17, 0.075);
+      if (stepIdx % 4 === 0) playTone(110, 'sine', 0.08, 0.08, 42);
+      if (stepIdx % 2 === 1) playNoise(0.04, 0.028, 3200);
+      stepIdx++;
+    } else if (currentTheme === 'stage2') {
+      const m = STAGE2_MELODY[stepIdx % STAGE2_MELODY.length];
+      const b = STAGE2_BASS[stepIdx % STAGE2_BASS.length];
+      if (m) playTone(m, 'sine', 0.21, 0.06);
+      if (b) playTone(b, 'sawtooth', 0.19, 0.045);
+      if (stepIdx % 4 === 0) playTone(82, 'sine', 0.12, 0.08, 38);
+      if (stepIdx % 4 === 3) playNoise(0.06, 0.022, 1600);
+      stepIdx++;
+    } else if (currentTheme === 'stage3') {
+      const m = STAGE3_MELODY[stepIdx % STAGE3_MELODY.length];
+      const b = STAGE3_BASS[stepIdx % STAGE3_BASS.length];
+      if (m) playTone(m, 'square', 0.11, 0.048);
+      if (b) playTone(b, 'triangle', 0.12, 0.085);
+      // Som rítmico de rodas nos trilhos ("clack-clack")
+      if (stepIdx % 2 === 0) playNoise(0.035, 0.045, 4200);
+      if (stepIdx % 4 === 0) playTone(125, 'sine', 0.07, 0.08, 50);
+      stepIdx++;
+    } else if (currentTheme === 'stage4') {
+      const m = STAGE4_MELODY[stepIdx % STAGE4_MELODY.length];
+      const b = STAGE4_BASS[stepIdx % STAGE4_BASS.length];
+      if (m) playTone(m, 'sawtooth', 0.13, 0.045);
+      if (b) playTone(b, 'triangle', 0.14, 0.08);
+      if (stepIdx % 2 === 0) playTone(115, 'sine', 0.07, 0.085, 45);
+      if (stepIdx % 2 === 1) playNoise(0.045, 0.035, 2900);
+      stepIdx++;
+    } else if (currentTheme === 'quiz') {
+      const m = QUIZ_MELODY[stepIdx % QUIZ_MELODY.length];
+      if (m) playTone(m, 'sine', 0.32, 0.05);
+      if (stepIdx % 4 === 0) playTone(N.D3, 'triangle', 0.35, 0.05);
+      stepIdx++;
+    }
+  }
+
+  function getStageThemeName() {
+    return ['stage1', 'stage2', 'stage3', 'stage4'][stageIdx] || 'stage1';
+  }
+
+  function startMusic(theme) {
+    init();
+    const resolvedTheme = theme === 'play' ? getStageThemeName() : theme;
+    if (currentTheme === resolvedTheme && seqTimer) return;
+    currentTheme = resolvedTheme;
+    stepIdx = 0;
+    if (seqTimer) { clearInterval(seqTimer); seqTimer = null; }
+    if (resolvedTheme === 'none') return;
+    const intervals = {
+      menu: 230,
+      stage1: 165,
+      stage2: 195,
+      stage3: 122, // Muito rápido para o carrinho!
+      stage4: 140, // Intenso para pegar itens na arena!
+      quiz: 280
+    };
+    seqTimer = setInterval(tickMusic, intervals[resolvedTheme] || 165);
+  }
+
+  function toggleMute() {
+    init();
+    muted = !muted;
+    const labelHome = muted ? '🔇 Som: OFF' : '🔊 Som: ON';
+    const labelHud = muted ? '🔇 Mudo' : '🔊 Som';
+    if ($('btn-home-sound')) $('btn-home-sound').textContent = labelHome;
+    if ($('btn-hud-sound')) $('btn-hud-sound').textContent = labelHud;
+    if (!muted) sfx.click();
+  }
+
+  const sfx = {
+    click: () => { init(); playTone(660, 'sine', 0.06, 0.1, 880); },
+    jump: () => { init(); playTone(220, 'square', 0.14, 0.09, 540); },
+    wallJump: () => {
+      init();
+      playTone(300, 'square', 0.09, 0.1, 620);
+      playTone(440, 'triangle', 0.14, 0.11, 880, 0.06);
+    },
+    railSwitch: () => {
+      init();
+      playTone(420, 'triangle', 0.07, 0.11, 680);
+      playNoise(0.05, 0.1, 3500);
+    },
+    catchGood: () => {
+      init();
+      playTone(587.33, 'sine', 0.09, 0.11, 880);
+      playTone(880, 'triangle', 0.12, 0.11, 1174.66, 0.06);
+    },
+    deflect: () => {
+      init();
+      playNoise(0.09, 0.15, 3200);
+      playTone(780, 'sawtooth', 0.08, 0.1, 320);
+    },
+    sword: () => {
+      init();
+      playNoise(0.11, 0.14, 1800);
+      playTone(520, 'sawtooth', 0.09, 0.08, 160);
+    },
+    magic: () => {
+      init();
+      [N.D5, N.F5s, N.A5, N.D5 * 2].forEach((f, i) => playTone(f, 'sine', 0.14, 0.09, null, i * 0.04));
+    },
+    hitEnemy: () => {
+      init();
+      playTone(160, 'sawtooth', 0.1, 0.13, 70);
+      playNoise(0.08, 0.12, 900);
+    },
+    enemyDefeat: () => {
+      init();
+      playNoise(0.2, 0.15, 700);
+      [N.D4, N.F4s, N.A4, N.D5].forEach((f, i) => playTone(f, 'square', 0.1, 0.08, null, i * 0.045));
+    },
+    hurt: () => {
+      init();
+      playTone(190, 'sawtooth', 0.22, 0.15, 65);
+      playNoise(0.15, 0.12, 500);
+    },
+    gateOpen: () => {
+      init();
+      playNoise(0.32, 0.14, 420);
+      [N.D4, N.G4, N.A4, N.D5].forEach((f, i) => playTone(f, 'triangle', 0.14, 0.11, null, i * 0.06));
+    },
+    vaseBreak: () => {
+      init();
+      playNoise(0.16, 0.16, 2600);
+      playTone(720, 'triangle', 0.08, 0.09, 260);
+    },
+    heal: () => {
+      init();
+      [N.D4, N.F4s, N.A4, N.D5, N.F5s].forEach((f, i) => playTone(f, 'sine', 0.16, 0.1, null, i * 0.05));
+    },
+    powerup: () => {
+      init();
+      [N.D4, N.G4, N.Bb4, N.D5, N.G5].forEach((f, i) => playTone(f, 'triangle', 0.14, 0.11, null, i * 0.05));
+    },
+    grimoire: () => {
+      init();
+      [N.A4, N.Bb4, N.D5, N.F5s].forEach((f, i) => playTone(f, 'triangle', 0.16, 0.1, null, i * 0.055));
+    },
+    quizCorrect: () => {
+      init();
+      [N.D4, N.F4s, N.A4, N.D5, N.F5s, N.A5].forEach((f, i) => playTone(f, 'triangle', 0.16, 0.12, null, i * 0.055));
+    },
+    quizWrong: () => {
+      init();
+      playTone(210, 'sawtooth', 0.18, 0.12, 150);
+      playTone(150, 'sawtooth', 0.25, 0.12, 105, 0.16);
+    },
+    levelUp: () => {
+      init();
+      [N.D4, N.F4s, N.A4, N.D5, N.A4, N.D5, N.F5s, N.A5].forEach((f, i) => playTone(f, 'square', 0.14, 0.1, null, i * 0.06));
+    },
+    stageClear: () => {
+      init();
+      [N.D4, N.G4, N.A4, N.Bb4, N.A4, N.D5].forEach((f, i) => playTone(f, 'triangle', 0.16, 0.12, null, i * 0.07));
+    },
+    victory: () => {
+      init();
+      const notes = [N.D4, N.F4s, N.A4, N.D5, N.C5, N.D5, N.Eb5, N.F5s, N.G5, N.A5];
+      notes.forEach((f, i) => playTone(f, 'triangle', 0.22, 0.13, null, i * 0.085));
+    }
+  };
+
+  return { init, startMusic, toggleMute, sfx };
+})();
+
+// Desbloqueia o Web Audio no primeiro toque/clique ou tecla pressionada
+window.addEventListener('pointerdown', () => {
+  SoundEngine.init();
+  if (!$('home').classList.contains('hidden') || !$('setup').classList.contains('hidden')) {
+    SoundEngine.startMusic('menu');
+  }
+}, { once: true });
+
+function showScreen(id) {
+  screens.forEach(s => $(s).classList.toggle('hidden', s !== id));
+  if (id === 'home' || id === 'setup' || id === 'ranking-screen') {
+    SoundEngine.startMusic('menu');
+  } else if (id === 'play') {
+    SoundEngine.startMusic('play');
+  } else if (id === 'quiz') {
+    SoundEngine.startMusic('quiz');
+  } else if (id === 'results') {
+    SoundEngine.startMusic('none');
+  }
+}
 
 // 6 Super-Heróis 30 Anos Rede Comunitá com traje Prince of Persia + 30 Anos
 const HEROES = [
@@ -831,6 +1175,21 @@ let platforms = [], pillars = [], gates = [], levers = [], plates = [], pushBloc
 let fountains = [], slicers = [], spikes = [], poisonPools = [], torches = [], ivies = [];
 let grimoires = [], vases = [], powerups = [], enemies = [], projectiles = [], particles = [];
 let exitPortal = { x: 2350, y: GROUND_Y - 108, w: 62, h: 108, open: false };
+
+// Variáveis exclusivas para as mecânicas das Fases 2, 3 e 4
+let stageBannerTimer = 0;
+let movingPlatforms = [], crystalSwitches = []; // Fase 2: Elevadores e Cristais
+let cart = {
+  lane: 1, targetY: 310, y: 310, vy: 0, jumping: false,
+  speed: 6.2, dist: 0, maxDist: 4800,
+  obstacles: [], items: [], sparks: [], rampBoost: 0, laneCooldown: 0
+}; // Fase 3: Corrida de Carrinho
+let sanctuary = {
+  caughtCount: 0, targetCount: 15,
+  fallingItems: [], spawnTimer: 0,
+  bossX: 480, bossVx: 3.2, bossAnim: 0,
+  magnetTimer: 0
+}; // Fase 4: Pegar itens na tela
 
 // Desenha o Herói no estilo Prince of Persia (Calça folgada branca, faixa, colete 30 anos e espada de luz)
 function drawPrinceHero(g, x, y, hData, facing, tick, wallSlide, mounted, starActive) {
@@ -1159,91 +1518,92 @@ function drawEnemyWithPersonality(g, e, tick) {
 }
 
 function buildStage() {
-  player.x = 55; player.y = 370; player.vx = 0; player.vy = 0;
+  player.vx = 0; player.vy = 0;
   player.wallSlide = 0; player.starTimer = 0;
+  player.actionTimer = 0; player.magicTimer = 0;
   exitPortal.open = false;
+  stageBannerTimer = 150;
+  powerups = [];
+  projectiles = [];
+  particles = [];
+  movingPlatforms = [];
+  crystalSwitches = [];
 
-  // Plataformas e Lajes em Pedra Azul-Ardósia (Estilo imagem Prince of Persia)
+  // Muda a trilha sonora dinamicamente de acordo com a personalidade da fase!
+  if (!$('play').classList.contains('hidden')) {
+    SoundEngine.startMusic('play');
+  }
+
+  if (stageIdx === 0) {
+    buildStage1();
+  } else if (stageIdx === 1) {
+    buildStage2();
+  } else if (stageIdx === 2) {
+    buildStage3();
+  } else {
+    buildStage4();
+  }
+  updateHUD();
+}
+
+// ============================================================================
+// FASE 1: TEMPLO ACROBÁTICO CLÁSSICO (MANTIDA COMO SOLICITADO)
+// ============================================================================
+function buildStage1() {
+  player.x = 55; player.y = 370;
+  exitPortal = { x: 2350, y: GROUND_Y - 108, w: 62, h: 108, open: false };
+
   platforms = [
-    // Área 1: Pátio da Fonte e Chaminé de Wall-Jump (igual à imagem!)
     { x: 190, y: 340, w: 190, h: 26 },
-    { x: 350, y: 170, w: 230, h: 28 }, // Topo da chaminé onde fica o 1º Grimório!
-
-    // Área 2: Salão do Bloco Empurrável e Placa de Pressão
+    { x: 350, y: 170, w: 230, h: 28 },
     { x: 680, y: 340, w: 310, h: 26 },
     { x: 760, y: 215, w: 210, h: 26 },
-
-    // Área 3: Galeria das Lâminas Cortantes e Alavanca Alta
     { x: 1140, y: 340, w: 250, h: 26 },
     { x: 1220, y: 210, w: 240, h: 26 },
     { x: 1510, y: 310, w: 210, h: 26 },
-
-    // Área 4: Torre Final do Santuário
     { x: 1840, y: 350, w: 250, h: 26 },
     { x: 1920, y: 220, w: 260, h: 26 }
   ];
 
-  // Colunas Verticais de Pedra Azul-Ardósia (Permitem Wall-Jump como na imagem!)
   pillars = [
-    // Chaminé de Wall Jump da Área 1 (Salte de uma parede à outra para subir!)
     { x: 190, y: 120, w: 38, h: 220, climbable: true },
     { x: 350, y: 170, w: 38, h: 170, climbable: true },
-
-    // Coluna do Portão 1
     { x: 560, y: 170, w: 36, h: 170, climbable: true },
-
-    // Coluna do Portão 2
     { x: 1050, y: 160, w: 36, h: 180, climbable: true },
-
-    // Coluna do Portão 3
     { x: 1740, y: 160, w: 36, h: 180, climbable: true }
   ];
 
-  // 3 Portões de Grade Pesada que trancam o caminho (abrem com Alavanca ou Placa de Pressão)
   gates = [
     { id: 0, x: 564, y: 340, w: 28, h: 128, open: false, openProgress: 0 },
     { id: 1, x: 1054, y: 340, w: 28, h: 128, open: false, openProgress: 0 },
     { id: 2, x: 1744, y: 340, w: 28, h: 128, open: false, openProgress: 0 }
   ];
 
-  // Alavancas de Parede (Aperte B ou encoste para puxar)
   levers = [
     { x: 490, y: 140, active: false, gateId: 0, hint: 'Alavanca do 1º Portão' },
     { x: 1620, y: 280, active: false, gateId: 2, hint: 'Alavanca do 3º Portão' }
   ];
 
-  // Puzzle de Bloco Empurrável + Placa de Pressão no Chão (Abre o Portão 2!)
-  pushBlocks = [
-    { x: 730, y: 300, w: 40, h: 40, vx: 0 }
-  ];
-  plates = [
-    { x: 910, y: 334, w: 52, h: 8, pressed: false, gateId: 1 }
-  ];
+  pushBlocks = [{ x: 730, y: 300, w: 40, h: 40, vx: 0 }];
+  plates = [{ x: 910, y: 334, w: 52, h: 8, pressed: false, gateId: 1 }];
 
-  // Fontes de Água em Arco na Parede (Igual à foto de referência!)
   fountains = [
     { x: 270, y: GROUND_Y - 82, w: 56, h: 82 },
     { x: 1280, y: GROUND_Y - 82, w: 56, h: 82 }
   ];
 
-  // Tochas Acesas na Parede de Arenito
   torches = [
     { x: 130, y: 360 }, { x: 455, y: 380 }, { x: 460, y: 115 },
     { x: 830, y: 280 }, { x: 1180, y: 280 }, { x: 1580, y: 380 },
     { x: 1980, y: 290 }, { x: 2280, y: 370 }
   ];
 
-  // Heras e Trepadeiras Verdes nas Bordas de Pedra (Igual à foto!)
   ivies = [
-    { x: 186, y: 336, w: 70, h: 55 },
-    { x: 348, y: 168, w: 65, h: 60 },
-    { x: 346, y: 336, w: 55, h: 50 },
-    { x: 680, y: 336, w: 75, h: 48 },
-    { x: 1140, y: 336, w: 68, h: 52 },
-    { x: 1840, y: 346, w: 72, h: 50 }
+    { x: 186, y: 336, w: 70, h: 55 }, { x: 348, y: 168, w: 65, h: 60 },
+    { x: 346, y: 336, w: 55, h: 50 }, { x: 680, y: 336, w: 75, h: 48 },
+    { x: 1140, y: 336, w: 68, h: 52 }, { x: 1840, y: 346, w: 72, h: 50 }
   ];
 
-  // Armadilhas Clássicas Prince of Persia: Lâminas Cortantes (Slicers) e Espinhos
   slicers = [
     { x: 870, y: 155, h: 60, phase: 0 },
     { x: 1340, y: 150, h: 60, phase: 1.5 },
@@ -1255,13 +1615,11 @@ function buildStage() {
     { x: 1420, y: GROUND_Y - 14, w: 95, h: 14 }
   ];
 
-  // Poças de Veneno da Fofoca
   poisonPools = [
     { x: 940, y: GROUND_Y - 10, w: 95 },
     { x: 1620, y: GROUND_Y - 10, w: 100 }
   ];
 
-  // Vasos Persas que soltam Cãopanheiro, Estrela da Super Empatia e Areias do Tempo
   vases = [
     { x: 245, y: 312, broken: false, drop: 'dog' },
     { x: 820, y: 187, broken: false, drop: 'star' },
@@ -1269,48 +1627,221 @@ function buildStage() {
     { x: 1960, y: 322, broken: false, drop: 'hp' }
   ];
 
-  // 3 Grimórios do Saber (?) por Fase
   grimoires = [
     { x: 430, y: 120, got: false, qIdx: 0 },
     { x: 900, y: 165, got: false, qIdx: 1 },
     { x: 2110, y: 170, got: false, qIdx: 2 }
   ];
 
-  // Guardas Sombrios com Arquétipos Visuais, Velocidades e Falas de Personalidade
-  const stageThemes = [
-    [
-      { name: 'Vizir da Fofoca', archetype: 'fofoca', taunt: 'Espalho boatos mesmo!' },
-      { name: 'Guarda do Individualismo', archetype: 'intolerancia', taunt: 'Cada um por si!' },
-      { name: 'Espectro da Omissão', archetype: 'assedio', taunt: 'Não é problema meu!' }
-    ],
-    [
-      { name: 'Mercador do Conflito', archetype: 'fofoca', taunt: 'Aceite este suborno!' },
-      { name: 'Bruto do Desperdício', archetype: 'intolerancia', taunt: 'Não cuido do patrimônio!' },
-      { name: 'Sombra da Quebra de Sigilo', archetype: 'assedio', taunt: 'Vou vazar os dados!' }
-    ],
-    [
-      { name: 'Golem do Capacitismo', archetype: 'capacitismo', taunt: 'Aqui há barreiras!' },
-      { name: 'Guarda da Segregação', archetype: 'intolerancia', taunt: 'Não trabalho junto!' },
-      { name: 'Vizir do Preconceito', archetype: 'fofoca', taunt: 'Julgo sem conhecer!' }
-    ],
-    [
-      { name: 'Tirano do Assédio Moral', archetype: 'intolerancia', taunt: 'Humilho todo dia!' },
-      { name: 'Espectro da Intimidação', archetype: 'assedio', taunt: 'Não aceito um NÃO!' },
-      { name: 'Golem do Silêncio', archetype: 'capacitismo', taunt: 'Ninguém vai denunciar!' }
-    ]
+  enemies = [
+    { x: 800, minX: 700, maxX: 960, y: GROUND_Y - 46, w: 34, h: 46, vx: 1.55, hp: 55, maxHp: 55, name: 'Vizir da Fofoca', archetype: 'fofoca', taunt: 'Espalho boatos mesmo!' },
+    { x: 1260, minX: 1150, maxX: 1370, y: 294, w: 34, h: 46, vx: -1.65, hp: 65, maxHp: 65, name: 'Guarda do Individualismo', archetype: 'intolerancia', taunt: 'Cada um por si!' },
+    { x: 1960, minX: 1850, maxX: 2070, y: GROUND_Y - 46, w: 36, h: 46, vx: 1.75, hp: 80, maxHp: 80, name: 'Espectro da Omissão', archetype: 'assedio', taunt: 'Não é problema meu!' }
   ];
-  const currTheme = stageThemes[stageIdx];
+}
+
+// ============================================================================
+// FASE 2: CÂMARAS DA INTEGRIDADE (ELEVADORES MÓVEIS, CRISTAIS E LABIRINTO)
+// ============================================================================
+function buildStage2() {
+  player.x = 55; player.y = 370;
+  exitPortal = { x: 2350, y: 112, w: 62, h: 108, open: false }; // Portal fica no alto da Torre da Ética!
+
+  platforms = [
+    { x: 150, y: 360, w: 160, h: 24 },
+    { x: 520, y: 200, w: 220, h: 26 },
+    { x: 820, y: 350, w: 240, h: 26 },
+    { x: 1280, y: 180, w: 270, h: 26 },
+    { x: 1620, y: 340, w: 230, h: 26 },
+    { x: 2150, y: 220, w: 280, h: 28 }
+  ];
+
+  // Elevadores de Pedra Móveis (Horizontais e Verticais)
+  movingPlatforms = [
+    { x: 340, y: 340, minX: 340, maxX: 340, minY: 200, maxY: 380, w: 130, h: 22, vx: 0, vy: -1.8, label: 'ELEVADOR' },
+    { x: 1080, y: 270, minX: 1070, maxX: 1250, minY: 270, maxY: 270, w: 130, h: 22, vx: 1.9, vy: 0, label: 'PONTE MÓVEL' },
+    { x: 1920, y: 340, minX: 1920, maxX: 1920, minY: 215, maxY: 400, w: 140, h: 22, vx: 0, vy: -2.1, label: 'TORRE FINAL' }
+  ];
+
+  pillars = [
+    { x: 740, y: 80, w: 36, h: 260, climbable: true },
+    { x: 1550, y: 120, w: 36, h: 220, climbable: true },
+    { x: 1840, y: 140, w: 36, h: 200, climbable: true }
+  ];
+
+  gates = [
+    { id: 0, x: 744, y: 340, w: 28, h: 128, open: false, openProgress: 0 },
+    { id: 1, x: 1554, y: 340, w: 28, h: 128, open: false, openProgress: 0 },
+    { id: 2, x: 2160, y: 92, w: 28, h: 128, open: false, openProgress: 0 }
+  ];
+
+  // Cristais de Sigilo e Transparência (Ative com Espada B ou Magia X para abrir portões!)
+  crystalSwitches = [
+    { x: 680, y: 145, active: false, gateId: 0, title: 'Cristal da Transparência' },
+    { x: 1490, y: 125, active: false, gateId: 1, title: 'Cristal do Sigilo' },
+    { x: 1750, y: 285, active: false, gateId: 2, title: 'Cristal da Ética' }
+  ];
+
+  levers = [];
+  pushBlocks = [
+    { x: 850, y: 310, w: 40, h: 40, vx: 0 },
+    { x: 1650, y: 300, w: 40, h: 40, vx: 0 }
+  ];
+  plates = [];
+
+  fountains = [
+    { x: 610, y: GROUND_Y - 82, w: 56, h: 82 },
+    { x: 1420, y: GROUND_Y - 82, w: 56, h: 82 }
+  ];
+
+  torches = [
+    { x: 110, y: 350 }, { x: 580, y: 140 }, { x: 920, y: 290 },
+    { x: 1360, y: 120 }, { x: 1720, y: 280 }, { x: 2260, y: 160 }
+  ];
+
+  ivies = [
+    { x: 520, y: 196, w: 70, h: 55 },
+    { x: 1280, y: 176, w: 70, h: 55 },
+    { x: 2150, y: 216, w: 75, h: 55 }
+  ];
+
+  slicers = [
+    { x: 610, y: 140, h: 60, phase: 0.4 },
+    { x: 950, y: 290, h: 60, phase: 1.1 },
+    { x: 1390, y: 120, h: 60, phase: 2.0 },
+    { x: 2240, y: 160, h: 60, phase: 0.9 }
+  ];
+
+  spikes = [
+    { x: 330, y: GROUND_Y - 14, w: 170, h: 14 },
+    { x: 1070, y: GROUND_Y - 14, w: 200, h: 14 },
+    { x: 1900, y: GROUND_Y - 14, w: 220, h: 14 }
+  ];
+
+  poisonPools = [
+    { x: 780, y: GROUND_Y - 10, w: 120 },
+    { x: 1590, y: GROUND_Y - 10, w: 130 }
+  ];
+
+  vases = [
+    { x: 210, y: 332, broken: false, drop: 'dog' },
+    { x: 990, y: 322, broken: false, drop: 'star' },
+    { x: 1330, y: 152, broken: false, drop: 'sand' },
+    { x: 1800, y: 312, broken: false, drop: 'hp' }
+  ];
+
+  grimoires = [
+    { x: 555, y: 150, got: false, qIdx: 0 },
+    { x: 1330, y: 130, got: false, qIdx: 1 },
+    { x: 2280, y: 170, got: false, qIdx: 2 }
+  ];
 
   enemies = [
-    { x: 800, minX: 700, maxX: 960, y: GROUND_Y - 46, w: 34, h: 46, vx: 1.55, hp: 55, maxHp: 55, ...currTheme[0] },
-    { x: 1260, minX: 1150, maxX: 1370, y: 294, w: 34, h: 46, vx: -1.65, hp: 65, maxHp: 65, ...currTheme[1] },
-    { x: 1960, minX: 1850, maxX: 2070, y: GROUND_Y - 46, w: 36, h: 46, vx: 1.75, hp: 80, maxHp: 80, ...currTheme[2] }
+    { x: 580, minX: 525, maxX: 710, y: 154, w: 34, h: 46, vx: 1.6, hp: 65, maxHp: 65, name: 'Mercador do Conflito', archetype: 'fofoca', taunt: 'Aceite este suborno!' },
+    { x: 900, minX: 830, maxX: 1030, y: 304, w: 34, h: 46, vx: -1.8, hp: 75, maxHp: 75, name: 'Bruto do Desperdício', archetype: 'intolerancia', taunt: 'Não cuido do patrimônio!' },
+    { x: 1680, minX: 1630, maxX: 1820, y: 294, w: 36, h: 46, vx: 1.9, hp: 85, maxHp: 85, name: 'Sombra da Quebra de Sigilo', archetype: 'assedio', taunt: 'Vou vazar os dados!' }
+  ];
+}
+
+// ============================================================================
+// FASE 3: JOGO DE CARRINHO NOS TRILHOS DA ACESSIBILIDADE (INCLUSÃO PcD)
+// ============================================================================
+const CART_LANES = [185, 310, 435];
+
+function buildStage3() {
+  cart.lane = 1;
+  cart.y = CART_LANES[1];
+  cart.targetY = CART_LANES[1];
+  cart.vy = 0;
+  cart.jumping = false;
+  cart.speed = 6.4;
+  cart.dist = 0;
+  cart.maxDist = 4800;
+  cart.rampBoost = 0;
+  cart.laneCooldown = 0;
+  cart.sparks = [];
+
+  grimoires = [
+    { got: false, qIdx: 0 },
+    { got: false, qIdx: 1 },
+    { got: false, qIdx: 2 }
   ];
 
-  powerups = [];
-  projectiles = [];
-  particles = [];
-  updateHUD();
+  // Gera obstáculos, rampas, joias e os 3 Grimórios ao longo da ferrovia persa
+  cart.obstacles = [];
+  cart.items = [];
+
+  for (let d = 550; d < cart.maxDist - 350; d += 230) {
+    const lane = Math.floor((d / 230) % 3);
+    const altLane = (lane + 1) % 3;
+    const typeRoll = (d / 230) % 4;
+
+    if (typeRoll === 0) {
+      // Barreira do Capacitismo (Pode desviar mudando de trilho, pular ou destruir com B!)
+      cart.obstacles.push({ x: d, lane, type: 'barrier', label: 'Capacitismo', hp: 1 });
+    } else if (typeRoll === 1) {
+      // Trilho Quebrado / Abismo (Pule com A ou mude de trilho!)
+      cart.obstacles.push({ x: d, lane, type: 'gap', label: 'Falta de Acesso', hp: 99 });
+      cart.obstacles.push({ x: d, lane: altLane, type: 'barrier', label: 'Segregação', hp: 1 });
+    } else if (typeRoll === 2) {
+      // Vagão Desgovernado da Exclusão (Vem na direção contrária!)
+      cart.obstacles.push({ x: d, lane: altLane, type: 'enemyCart', label: 'Preconceito', hp: 1, vx: -1.8 });
+    } else {
+      // Rampa Dourada de Acessibilidade (Dá super impulso e pontos!)
+      cart.items.push({ x: d, lane, type: 'ramp', collected: false });
+    }
+
+    // Símbolos de Acessibilidade e Morangos/Corações nos trilhos livres
+    const freeLane = (lane + 2) % 3;
+    cart.items.push({
+      x: d + 90,
+      lane: freeLane,
+      type: (d % 460 === 0) ? 'heart' : 'gem',
+      collected: false
+    });
+  }
+
+  // Posiciona os 3 Grimórios (?) nos trilhos (se o jogador perder algum, ele reaparece mais à frente!)
+  cart.items.push({ x: 1150, lane: 0, type: 'grimoire', qIdx: 0, collected: false });
+  cart.items.push({ x: 2450, lane: 1, type: 'grimoire', qIdx: 1, collected: false });
+  cart.items.push({ x: 3650, lane: 2, type: 'grimoire', qIdx: 2, collected: false });
+}
+
+// ============================================================================
+// FASE 4: PEGAR COISAS NA TELA — ARENA DO SANTUÁRIO DO RESPEITO
+// ============================================================================
+function buildStage4() {
+  player.x = 450;
+  player.y = GROUND_Y - player.h;
+  player.vx = 0;
+  player.vy = 0;
+
+  sanctuary.caughtCount = 0;
+  sanctuary.targetCount = 15;
+  sanctuary.fallingItems = [];
+  sanctuary.spawnTimer = 25;
+  sanctuary.bossX = 480;
+  sanctuary.bossVx = 3.4;
+  sanctuary.bossAnim = 0;
+  sanctuary.magnetTimer = 0;
+
+  // Pedestais laterais para saltar e alcançar itens altos no Santuário
+  platforms = [
+    { x: 70, y: 345, w: 170, h: 22 },
+    { x: 720, y: 345, w: 170, h: 22 },
+    { x: 365, y: 275, w: 230, h: 22 }
+  ];
+  pillars = [];
+  gates = [];
+  poisonPools = [];
+
+  grimoires = [
+    { got: false, qIdx: 0 },
+    { got: false, qIdx: 1 },
+    { got: false, qIdx: 2 }
+  ];
+
+  exitPortal = { x: 449, y: GROUND_Y - 108, w: 62, h: 108, open: false };
 }
 
 function addFloatText(txt, x, y, color = '#f5b932') {
@@ -1324,14 +1855,35 @@ function gainXP(amount) {
     rpgLvl++;
     hp = 100;
     mp = 50;
+    SoundEngine.sfx.levelUp();
     addFloatText('LEVEL UP! NV ' + rpgLvl, player.x, player.y - 20, '#4ade80');
   }
 }
 
 function updatePhysics() {
   player.animTick++;
+  if (stageBannerTimer > 0) stageBannerTimer--;
   if (player.invuln > 0) player.invuln--;
   if (player.starTimer > 0) player.starTimer--;
+
+  // Despacha a física específica para a Fase 3 (Carrinho) ou Fase 4 (Pegar Itens)
+  if (stageIdx === 2) {
+    updateStage3Cart();
+    return;
+  }
+  if (stageIdx === 3) {
+    updateStage4Catch();
+    return;
+  }
+
+  // FASES 1 E 2: PLATAFORMA ACROBÁTICA + ELEVADORES E CRISTAIS
+  // Atualizar Elevadores Móveis (Fase 2)
+  movingPlatforms.forEach(mp => {
+    mp.x += mp.vx;
+    mp.y += mp.vy;
+    if (mp.vx !== 0 && (mp.x < mp.minX || mp.x > mp.maxX)) mp.vx *= -1;
+    if (mp.vy !== 0 && (mp.y < mp.minY || mp.y > mp.maxY)) mp.vy *= -1;
+  });
 
   // Movimento Horizontal
   const spd = player.starTimer > 0 ? 5.3 : (player.mounted ? 4.7 : 4.1);
@@ -1352,6 +1904,7 @@ function updatePhysics() {
       player.vy = player.mounted ? -12.5 : -11.6;
       player.grounded = false;
       player.jumpsLeft = player.mounted ? 1 : 0;
+      SoundEngine.sfx.jump();
       keys.jump = false;
     } else if (player.wallSlide !== 0) {
       // Wall Jump estilo Prince of Persia! Impulsiona para o lado oposto e para cima
@@ -1359,11 +1912,13 @@ function updatePhysics() {
       player.vx = -player.wallSlide * 6.5;
       player.facing = -player.wallSlide;
       player.wallSlide = 0;
+      SoundEngine.sfx.wallJump();
       addFloatText('🧗 WALL JUMP!', player.x, player.y, '#7fd4ff');
       keys.jump = false;
     } else if (player.jumpsLeft > 0) {
       player.vy = -11.2;
       player.jumpsLeft--;
+      SoundEngine.sfx.jump();
       keys.jump = false;
     }
   }
@@ -1377,10 +1932,10 @@ function updatePhysics() {
   pushBlocks.forEach(b => {
     if (rectOverlap(player, b)) {
       if (player.vx > 0 && player.x < b.x) {
-        b.x = Math.min(955, b.x + 2.4);
+        b.x = Math.min(WORLD_W - 100, b.x + 2.4);
         player.x = b.x - player.w;
       } else if (player.vx < 0 && player.x > b.x) {
-        b.x = Math.max(690, b.x - 2.4);
+        b.x = Math.max(60, b.x - 2.4);
         player.x = b.x + b.w;
       }
     }
@@ -1407,7 +1962,7 @@ function updatePhysics() {
     }
   });
 
-  // Move Y e checa Chão, Plataformas, Topo de Pilares e Topo de Blocos
+  // Move Y e checa Chão, Plataformas, Elevadores Móveis, Topo de Pilares e Topo de Blocos
   player.y += player.vy;
   player.grounded = false;
 
@@ -1418,18 +1973,34 @@ function updatePhysics() {
     player.jumpsLeft = player.mounted ? 2 : 1;
   }
 
-  [...platforms, ...pillars, ...pushBlocks].forEach(plat => {
+  [...platforms, ...movingPlatforms, ...pillars, ...pushBlocks].forEach(plat => {
     if (
       player.x + player.w > plat.x + 4 &&
       player.x < plat.x + plat.w - 4 &&
       player.y + player.h >= plat.y &&
-      player.y + player.h <= plat.y + Math.max(16, player.vy + 10) &&
+      player.y + player.h <= plat.y + Math.max(18, player.vy + 12) &&
       player.vy >= 0
     ) {
       player.y = plat.y - player.h;
       player.vy = 0;
       player.grounded = true;
       player.jumpsLeft = player.mounted ? 2 : 1;
+      // Se for um elevador móvel da Fase 2, transporta o herói junto!
+      if (plat.vx) player.x += plat.vx;
+      if (plat.vy) player.y += plat.vy;
+    }
+  });
+
+  // Ativar Cristais de Sigilo e Transparência da Fase 2 (Ao encostar ou golpear)
+  crystalSwitches.forEach(cs => {
+    if (!cs.active && Math.hypot((player.x + 15) - cs.x, (player.y + 24) - cs.y) < 42) {
+      cs.active = true;
+      const g = gates.find(gt => gt.id === cs.gateId);
+      if (g) g.open = true;
+      score += 65;
+      SoundEngine.sfx.gateOpen();
+      addFloatText('💎 ' + cs.title.toUpperCase() + ' ATIVADO!', cs.x, cs.y - 20, '#7fd4ff');
+      updateHUD();
     }
   });
 
@@ -1443,6 +2014,7 @@ function updatePhysics() {
       if (g && !g.open) {
         g.open = true;
         score += 60;
+        SoundEngine.sfx.gateOpen();
         addFloatText('⚙️ PLACA ATIVADA! PORTÃO ABERTO!', pl.x, pl.y - 25, '#4ade80');
         updateHUD();
       }
@@ -1460,6 +2032,7 @@ function updatePhysics() {
   if (keys.action && player.actionTimer === 0) {
     player.actionTimer = 16;
     keys.action = false;
+    SoundEngine.sfx.sword();
 
     const hitX = player.facing === 1 ? player.x + player.w : player.x - 54;
     const swordBox = { x: hitX, y: player.y + 6, w: 54, h: 36 };
@@ -1471,6 +2044,7 @@ function updatePhysics() {
         const g = gates.find(gt => gt.id === lev.gateId);
         if (g) g.open = true;
         score += 50;
+        SoundEngine.sfx.gateOpen();
         addFloatText('🏛️ ALAVANCA ACIONADA!', lev.x, lev.y - 20, '#4ade80');
         updateHUD();
       }
@@ -1481,6 +2055,7 @@ function updatePhysics() {
       if (rectOverlap(player, f)) {
         hp = Math.min(100, hp + 35);
         mp = Math.min(50, mp + 20);
+        SoundEngine.sfx.heal();
         addFloatText('⛲ ÁGUA DA VIDA (+35 HP)', f.x + 28, f.y, '#7fd4ff');
         updateHUD();
       }
@@ -1491,6 +2066,7 @@ function updatePhysics() {
       if (!v.broken && rectOverlap(swordBox, { x: v.x - 12, y: v.y - 10, w: 28, h: 32 })) {
         v.broken = true;
         score += 25;
+        SoundEngine.sfx.vaseBreak();
         powerups.push({ x: v.x, y: v.y - 8, type: v.drop });
         addFloatText('🏺 +TESOURO!', v.x, v.y - 12, '#f5b932');
         updateHUD();
@@ -1505,8 +2081,11 @@ function updatePhysics() {
         addFloatText('-' + dmg, e.x, e.y, '#ff6b22');
         if (e.hp <= 0) {
           score += 80;
+          SoundEngine.sfx.enemyDefeat();
           gainXP(45);
           addFloatText('+80 PTS', e.x, e.y - 14, '#4ade80');
+        } else {
+          SoundEngine.sfx.hitEnemy();
         }
         updateHUD();
       }
@@ -1521,6 +2100,7 @@ function updatePhysics() {
       const g = gates.find(gt => gt.id === lev.gateId);
       if (g) g.open = true;
       score += 50;
+      SoundEngine.sfx.gateOpen();
       addFloatText('🏛️ PORTÃO ABERTO!', lev.x, lev.y - 20, '#4ade80');
       updateHUD();
     }
@@ -1531,6 +2111,7 @@ function updatePhysics() {
     mp -= 15;
     player.magicTimer = 24;
     keys.magic = false;
+    SoundEngine.sfx.magic();
     projectiles.push({ x: player.x + 15, y: player.y + 18, vx: player.facing * 8.5, ticks: 0 });
     updateHUD();
   }
@@ -1544,7 +2125,14 @@ function updatePhysics() {
       if (e.hp > 0 && rectOverlap({ x: p.x - 12, y: p.y - 12, w: 24, h: 24 }, e)) {
         e.hp -= 10;
         addFloatText('-10✨', e.x, e.y, '#7fd4ff');
-        if (e.hp <= 0) { score += 80; gainXP(45); updateHUD(); }
+        if (e.hp <= 0) {
+          score += 80;
+          SoundEngine.sfx.enemyDefeat();
+          gainXP(45);
+          updateHUD();
+        } else {
+          SoundEngine.sfx.hitEnemy();
+        }
       }
     });
   });
@@ -1554,6 +2142,7 @@ function updatePhysics() {
   powerups.forEach(p => {
     if (rectOverlap(player, { x: p.x - 12, y: p.y - 12, w: 28, h: 28 })) {
       p.collected = true;
+      SoundEngine.sfx.powerup();
       if (p.type === 'dog') {
         player.mounted = true;
         addFloatText('🐾 CÃOPANHEIRO! (Pulo Duplo + Imune a Veneno)', player.x, player.y - 16, '#f5b932');
@@ -1576,6 +2165,7 @@ function updatePhysics() {
   grimoires.forEach(g => {
     if (!g.got && rectOverlap(player, { x: g.x, y: g.y, w: 34, h: 34 })) {
       g.got = true;
+      SoundEngine.sfx.grimoire();
       openQuizModal(g.qIdx);
     }
   });
@@ -1606,7 +2196,7 @@ function updatePhysics() {
     if (e.x < e.minX || e.x > e.maxX) e.vx *= -1;
     if (rectOverlap(player, e)) {
       if (player.starTimer > 0) {
-        e.hp = 0; score += 80; addFloatText('CONVERTIDO!', e.x, e.y, '#7fd4ff'); updateHUD();
+        e.hp = 0; score += 80; SoundEngine.sfx.enemyDefeat(); addFloatText('CONVERTIDO!', e.x, e.y, '#7fd4ff'); updateHUD();
       } else {
         damagePlayer(15);
       }
@@ -1621,6 +2211,7 @@ function updatePhysics() {
   if (rectOverlap(player, exitPortal)) {
     if (exitPortal.open) {
       if (stageIdx < STAGES.length - 1) {
+        SoundEngine.sfx.stageClear();
         stageIdx++;
         buildStage();
       } else {
@@ -1635,10 +2226,393 @@ function updatePhysics() {
   particles = particles.filter(pt => pt.life > 0);
 }
 
+// ============================================================================
+// FÍSICA DA FASE 3: CORRIDA DE CARRINHO NOS TRILHOS DA ACESSIBILIDADE
+// ============================================================================
+function updateStage3Cart() {
+  if (cart.laneCooldown > 0) cart.laneCooldown--;
+  if (cart.rampBoost > 0) cart.rampBoost--;
+
+  // Trocar de trilho com ▲ (Cima) ou ▼ (Baixo)
+  if (keys.up && !cart.jumping && cart.laneCooldown === 0 && cart.lane > 0) {
+    cart.lane--;
+    cart.targetY = CART_LANES[cart.lane];
+    cart.laneCooldown = 14;
+    keys.up = false;
+    keys.jump = false;
+    SoundEngine.sfx.railSwitch();
+    addFloatText('⬆️ TRILHO SUPERIOR', 210, cart.y - 30, '#7fd4ff');
+  } else if (keys.down && !cart.jumping && cart.laneCooldown === 0 && cart.lane < 2) {
+    cart.lane++;
+    cart.targetY = CART_LANES[cart.lane];
+    cart.laneCooldown = 14;
+    keys.down = false;
+    SoundEngine.sfx.railSwitch();
+    addFloatText('⬇️ TRILHO INFERIOR', 210, cart.y - 30, '#7fd4ff');
+  }
+
+  // Pular sobre trilhos quebrados ou barreiras com botão A (ou Espaço)
+  if (keys.jump && !cart.jumping) {
+    cart.jumping = true;
+    cart.vy = -11.8;
+    keys.jump = false;
+    SoundEngine.sfx.jump();
+  }
+
+  // Suavização da transição de trilho + Pulo do Carrinho
+  if (cart.jumping) {
+    cart.y += cart.vy;
+    cart.vy += 0.58;
+    if (cart.y >= CART_LANES[cart.lane]) {
+      cart.y = CART_LANES[cart.lane];
+      cart.vy = 0;
+      cart.jumping = false;
+      SoundEngine.sfx.railSwitch();
+    }
+  } else {
+    cart.y += (CART_LANES[cart.lane] - cart.y) * 0.32;
+  }
+
+  // Controle de velocidade do carrinho (◀ freia levemente, ▶ ou Rampa acelera)
+  const baseSpd = cart.rampBoost > 0 ? 9.2 : (keys.right ? 7.6 : (keys.left ? 4.8 : 6.3));
+  cart.speed += (baseSpd - cart.speed) * 0.15;
+  cart.dist += cart.speed;
+
+  // Faíscas nas rodas do carrinho
+  if (player.animTick % 3 === 0 && !cart.jumping) {
+    cart.sparks.push({
+      x: 175 + Math.random() * 45,
+      y: cart.y + 8,
+      vx: -2 - Math.random() * 3,
+      vy: -1 - Math.random() * 2,
+      life: 14
+    });
+  }
+  cart.sparks.forEach(s => { s.x += s.vx; s.y += s.vy; s.life--; });
+  cart.sparks = cart.sparks.filter(s => s.life > 0);
+
+  // Ataque com Cimitarra (Botão B) ou Magia (Botão X) de dentro do carrinho!
+  if (keys.action && player.actionTimer === 0) {
+    player.actionTimer = 15;
+    keys.action = false;
+    SoundEngine.sfx.sword();
+    cart.obstacles.forEach(ob => {
+      const screenX = ob.x - cart.dist + 190;
+      if (ob.hp > 0 && ob.type !== 'gap' && ob.lane === cart.lane && screenX > 160 && screenX < 330) {
+        ob.hp = 0;
+        score += 55;
+        SoundEngine.sfx.enemyDefeat();
+        addFloatText('💥 BARREIRA REMOVIDA! +55', screenX, CART_LANES[ob.lane] - 35, '#4ade80');
+        updateHUD();
+      }
+    });
+  }
+  if (player.actionTimer > 0) player.actionTimer--;
+
+  if (keys.magic && player.magicTimer === 0 && mp >= 15) {
+    mp -= 15;
+    player.magicTimer = 25;
+    cart.rampBoost = 90;
+    keys.magic = false;
+    SoundEngine.sfx.magic();
+    addFloatText('⚡ TURBO DE ACESSIBILIDADE!', 220, cart.y - 45, '#f5b932');
+    updateHUD();
+  }
+  if (player.magicTimer > 0) player.magicTimer--;
+
+  // Colisão com Obstáculos nos Trilhos
+  cart.obstacles.forEach(ob => {
+    if (ob.hp <= 0) return;
+    if (ob.vx) ob.x += ob.vx;
+    const screenX = ob.x - cart.dist + 190;
+
+    if (ob.lane === cart.lane && screenX > 165 && screenX < 235) {
+      // Se estiver pulando alto ou com Estrela/Turbo, passa por cima!
+      const isHighJump = cart.jumping && (CART_LANES[cart.lane] - cart.y > 26);
+      if (isHighJump) return;
+
+      if (cart.rampBoost > 0 && ob.type !== 'gap') {
+        ob.hp = 0;
+        score += 40;
+        SoundEngine.sfx.enemyDefeat();
+        addFloatText('⚡ ATROPELOU A BARREIRA!', screenX, cart.y - 30, '#7fd4ff');
+      } else {
+        ob.hp = 0;
+        damagePlayer(16);
+      }
+    }
+  });
+
+  // Coletar Itens, Rampas e os 3 Grimórios (?) nos Trilhos
+  cart.items.forEach(it => {
+    if (it.collected) return;
+    const screenX = it.x - cart.dist + 190;
+
+    // Se um Grimório (?) passou sem ser pego, reposiciona-o mais à frente para não travar o jogador!
+    if (it.type === 'grimoire' && screenX < -40) {
+      it.x = cart.dist + 650;
+      it.lane = (it.lane + 1) % 3;
+      return;
+    }
+
+    if (it.lane === cart.lane && Math.abs(screenX - 205) < 44 && Math.abs(cart.y - CART_LANES[it.lane]) < 48) {
+      it.collected = true;
+      if (it.type === 'grimoire') {
+        grimoires[it.qIdx].got = true;
+        SoundEngine.sfx.grimoire();
+        updateHUD();
+        openQuizModal(it.qIdx);
+      } else if (it.type === 'ramp') {
+        cart.rampBoost = 85;
+        cart.jumping = true;
+        cart.vy = -10.5;
+        score += 50;
+        SoundEngine.sfx.powerup();
+        addFloatText('♿ RAMPA DE ACESSIBILIDADE! +50', screenX, cart.y - 35, '#4ade80');
+        updateHUD();
+      } else if (it.type === 'heart') {
+        hp = Math.min(100, hp + 25);
+        mp = Math.min(50, mp + 15);
+        score += 30;
+        SoundEngine.sfx.heal();
+        addFloatText('❤️ +25 HP', screenX, cart.y - 30, '#4ade80');
+        updateHUD();
+      } else {
+        score += 25;
+        SoundEngine.sfx.catchGood();
+        addFloatText('♿ +25 PTS', screenX, cart.y - 25, '#f5b932');
+        updateHUD();
+      }
+    }
+  });
+
+  // Se chegou ao fim dos trilhos mas ainda falta algum Grimório, prolonga o trilho até pegar os 3!
+  if (cart.dist >= cart.maxDist - 250) {
+    if (grimoires.every(g => g.got)) {
+      SoundEngine.sfx.stageClear();
+      stageIdx++;
+      buildStage();
+      return;
+    } else {
+      cart.maxDist += 900;
+      addFloatText('Pegue os 3 Grimórios (?) nos trilhos para avançar!', 480, 120, '#f5b932');
+    }
+  }
+
+  particles.forEach(pt => { pt.y += pt.vy; pt.life--; });
+  particles = particles.filter(pt => pt.life > 0);
+}
+
+// ============================================================================
+// FÍSICA DA FASE 4: PEGAR COISAS NA TELA (SANTUÁRIO DO RESPEITO E OUVIDORIA)
+// ============================================================================
+function updateStage4Catch() {
+  if (sanctuary.magnetTimer > 0) sanctuary.magnetTimer--;
+
+  // Movimento ágil do Herói na Arena (960px de largura)
+  const spd = sanctuary.magnetTimer > 0 ? 6.4 : 5.4;
+  if (keys.left) { player.vx = -spd; player.facing = -1; }
+  else if (keys.right) { player.vx = spd; player.facing = 1; }
+  else { player.vx *= 0.78; }
+
+  if (keys.jump && player.grounded) {
+    player.vy = -12.4;
+    player.grounded = false;
+    keys.jump = false;
+    SoundEngine.sfx.jump();
+  }
+
+  player.vy += 0.56;
+  player.x = Math.max(24, Math.min(canvas.width - 54, player.x + player.vx));
+  player.y += player.vy;
+  player.grounded = false;
+
+  if (player.y + player.h >= GROUND_Y) {
+    player.y = GROUND_Y - player.h;
+    player.vy = 0;
+    player.grounded = true;
+  }
+
+  platforms.forEach(plat => {
+    if (
+      player.x + player.w > plat.x + 4 &&
+      player.x < plat.x + plat.w - 4 &&
+      player.y + player.h >= plat.y &&
+      player.y + player.h <= plat.y + 18 &&
+      player.vy >= 0
+    ) {
+      player.y = plat.y - player.h;
+      player.vy = 0;
+      player.grounded = true;
+    }
+  });
+
+  // Movimentação do Chefão "Sombra do Assédio" no balcão superior do Santuário
+  sanctuary.bossAnim++;
+  sanctuary.bossX += sanctuary.bossVx;
+  if (sanctuary.bossX < 140 || sanctuary.bossX > canvas.width - 180) {
+    sanctuary.bossVx *= -1;
+  }
+
+  // Gerador de Itens Caindo na Tela (Bons para pegar + Ameaças para rebater/desviar)
+  sanctuary.spawnTimer--;
+  if (sanctuary.spawnTimer <= 0) {
+    sanctuary.spawnTimer = 34;
+    const isGood = Math.random() < 0.64;
+
+    if (isGood) {
+      const goodTypes = [
+        { icon: '📜', label: 'Ouvidoria Sigilosa', pts: 45, color: '#f5b932' },
+        { icon: '🛡️', label: 'Apoio à Vítima', pts: 40, color: '#4ade80', heal: 12 },
+        { icon: '⚖️', label: 'Provas Registradas', pts: 50, color: '#7fd4ff' },
+        { icon: '💜', label: 'Respeito & Diálogo', pts: 35, color: '#e0aaff', mp: 10 }
+      ];
+      const pick = goodTypes[Math.floor(Math.random() * goodTypes.length)];
+      sanctuary.fallingItems.push({
+        x: 70 + Math.random() * (canvas.width - 140),
+        y: 55,
+        vx: (Math.random() - 0.5) * 1.2,
+        vy: 2.1 + Math.random() * 1.3,
+        good: true,
+        ...pick
+      });
+    } else {
+      // Lançado pela Sombra do Assédio no topo!
+      const badTypes = [
+        { icon: '🗣️', label: 'Humilhação!', dmg: 16, color: '#ef4444' },
+        { icon: '🐍', label: 'Boato Hostil!', dmg: 14, color: '#84cc16' },
+        { icon: '⚡', label: 'Intimidação!', dmg: 18, color: '#c084fc' }
+      ];
+      const pick = badTypes[Math.floor(Math.random() * badTypes.length)];
+      sanctuary.fallingItems.push({
+        x: sanctuary.bossX + 20,
+        y: 92,
+        vx: ((player.x - sanctuary.bossX) / 140) + (Math.random() - 0.5) * 1.5,
+        vy: 2.8 + Math.random() * 1.4,
+        good: false,
+        ...pick
+      });
+    }
+  }
+
+  // Botão B: Golpe de Cimitarra para Rebater/Destruir Ameaças no Ar!
+  if (keys.action && player.actionTimer === 0) {
+    player.actionTimer = 15;
+    keys.action = false;
+    SoundEngine.sfx.sword();
+    sanctuary.fallingItems.forEach(it => {
+      if (!it.good && !it.removed && Math.hypot((player.x + 15) - it.x, (player.y + 20) - it.y) < 76) {
+        it.removed = true;
+        score += 40;
+        SoundEngine.sfx.deflect();
+        addFloatText('⚔️ REBATIDO! +40', it.x, it.y, '#7fd4ff');
+        updateHUD();
+      }
+    });
+  }
+  if (player.actionTimer > 0) player.actionTimer--;
+
+  // Botão X: Ímã da Empatia (Atrai automaticamente todos os itens bons da tela!)
+  if (keys.magic && player.magicTimer === 0 && mp >= 15) {
+    mp -= 15;
+    player.magicTimer = 25;
+    sanctuary.magnetTimer = 170;
+    keys.magic = false;
+    SoundEngine.sfx.magic();
+    addFloatText('🧲 ÍMÃ DA EMPATIA ATIVADO!', player.x, player.y - 25, '#f5b932');
+    updateHUD();
+  }
+  if (player.magicTimer > 0) player.magicTimer--;
+
+  // Atualizar queda e colisão dos itens na tela
+  sanctuary.fallingItems.forEach(it => {
+    if (it.removed) return;
+
+    // Se o Ímã da Empatia estiver ativo, puxa os itens bons até o herói!
+    if (it.good && sanctuary.magnetTimer > 0) {
+      it.x += (player.x + 15 - it.x) * 0.09;
+      it.y += (player.y + 20 - it.y) * 0.09;
+    } else {
+      it.x += it.vx;
+      it.y += it.vy;
+    }
+
+    // Grimório (?) não some ao tocar no chão: fica quicando esperando o jogador!
+    if (it.isGrimoire && it.y >= GROUND_Y - 24) {
+      it.y = GROUND_Y - 24;
+      it.vy = -4.5;
+      it.vx *= 0.8;
+    }
+
+    // Checa se o Herói pegou o item
+    if (Math.hypot((player.x + 15) - it.x, (player.y + 24) - it.y) < 38) {
+      it.removed = true;
+      if (it.isGrimoire) {
+        grimoires[it.qIdx].got = true;
+        SoundEngine.sfx.grimoire();
+        updateHUD();
+        openQuizModal(it.qIdx);
+      } else if (it.good) {
+        sanctuary.caughtCount++;
+        score += it.pts;
+        if (it.heal) hp = Math.min(100, hp + it.heal);
+        if (it.mp) mp = Math.min(50, mp + it.mp);
+        SoundEngine.sfx.catchGood();
+        gainXP(20);
+        addFloatText(`${it.icon} +${it.pts} (${it.label})`, it.x, it.y, it.color);
+
+        // Libera os 3 Grimórios (?) ao atingir 4, 9 e 14 itens capturados!
+        const thresholds = [4, 9, 14];
+        thresholds.forEach((th, idx) => {
+          if (sanctuary.caughtCount === th && !grimoires[idx].got && !grimoires[idx].spawned) {
+            grimoires[idx].spawned = true;
+            sanctuary.fallingItems.push({
+              x: 220 + idx * 240,
+              y: 60,
+              vx: 0,
+              vy: 2.2,
+              good: true,
+              isGrimoire: true,
+              qIdx: idx,
+              icon: '?',
+              label: `Grimório ${idx + 1}/3`
+            });
+            addFloatText('📖 GRIMÓRIO DO SABER DESCEU!', 480, 130, '#f5b932');
+          }
+        });
+        updateHUD();
+      } else {
+        damagePlayer(it.dmg);
+      }
+    } else if (it.y > GROUND_Y) {
+      it.removed = true;
+    }
+  });
+
+  sanctuary.fallingItems = sanctuary.fallingItems.filter(it => !it.removed);
+
+  // Quando os 3 Grimórios são respondidos e a meta de itens é atingida, abre o Portal Final!
+  if (grimoires.every(g => g.got) && sanctuary.caughtCount >= sanctuary.targetCount) {
+    if (!exitPortal.open) {
+      exitPortal.open = true;
+      SoundEngine.sfx.gateOpen();
+      addFloatText('🌟 PORTAL DA VITÓRIA ABERTO NO CENTRO!', 480, 220, '#4ade80');
+    }
+  }
+
+  if (exitPortal.open && rectOverlap(player, exitPortal)) {
+    finishAdventure();
+  }
+
+  particles.forEach(pt => { pt.y += pt.vy; pt.life--; });
+  particles = particles.filter(pt => pt.life > 0);
+}
+
 function damagePlayer(dmg) {
   if (player.invuln > 0 || player.starTimer > 0) return;
   player.invuln = 50;
   player.vy = -5.5;
+  SoundEngine.sfx.hurt();
   if (player.mounted) {
     player.mounted = false;
     addFloatText('O Cãopanheiro absorveu o dano!', player.x, player.y, '#f5b932');
@@ -1661,6 +2635,19 @@ function rectOverlap(a, b) {
 
 // RENDERIZAÇÃO FIEL À IMAGEM PRINCE OF PERSIA (Arenito + Pedra Azul-Ardósia + Heras + Fontes + Medallion)
 function renderScene() {
+  if (stageIdx === 2) {
+    renderStage3Cart();
+    drawPersianCornerHUD();
+    drawStageBanner();
+    return;
+  }
+  if (stageIdx === 3) {
+    renderStage4Catch();
+    drawPersianCornerHUD();
+    drawStageBanner();
+    return;
+  }
+
   const st = STAGES[stageIdx];
   const camX = Math.max(0, Math.min(WORLD_W - canvas.width, player.x - canvas.width * 0.36));
 
@@ -1678,7 +2665,7 @@ function renderScene() {
 
   // Sombreado atmosférico do templo
   const shadeGrad = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
-  shadeGrad.addColorStop(0, 'rgba(15, 23, 34, 0.48)');
+  shadeGrad.addColorStop(0, stageIdx === 1 ? 'rgba(28, 12, 54, 0.58)' : 'rgba(15, 23, 34, 0.48)');
   shadeGrad.addColorStop(0.5, st.tint);
   shadeGrad.addColorStop(1, 'rgba(20, 15, 10, 0.38)');
   ctx.fillStyle = shadeGrad;
@@ -1759,10 +2746,42 @@ function renderScene() {
     ctx.fill();
   });
 
-  // 4. Chão Principal e Colunas/Plataformas em Pedra Azul-Ardósia (Slate-Blue Stone da imagem!)
+  // 4. Chão Principal, Elevadores Móveis e Colunas/Plataformas em Pedra Azul-Ardósia
   drawSlateBlockStructure(0, GROUND_Y, WORLD_W, canvas.height - GROUND_Y, true);
   platforms.forEach(p => drawSlateBlockStructure(p.x, p.y, p.w, p.h, true));
   pillars.forEach(pil => drawSlateBlockStructure(pil.x, pil.y, pil.w, pil.h, false));
+
+  // Renderiza Elevadores Móveis (Fase 2)
+  movingPlatforms.forEach(mp => {
+    drawSlateBlockStructure(mp.x, mp.y, mp.w, mp.h, true);
+    ctx.strokeStyle = '#f5b932';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(mp.x + 2, mp.y + 2, mp.w - 4, mp.h - 4);
+    ctx.fillStyle = '#f5b932';
+    ctx.font = 'bold 9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🛗 ' + mp.label, mp.x + mp.w / 2, mp.y + 15);
+  });
+
+  // Renderiza Cristais de Sigilo e Transparência (Fase 2)
+  crystalSwitches.forEach((cs, idx) => {
+    const floatY = Math.sin(player.animTick * 0.12 + idx) * 4;
+    ctx.fillStyle = cs.active ? '#2ecc71' : '#00d2ff';
+    ctx.beginPath();
+    ctx.moveTo(cs.x, cs.y - 16 + floatY);
+    ctx.lineTo(cs.x + 14, cs.y + floatY);
+    ctx.lineTo(cs.x, cs.y + 16 + floatY);
+    ctx.lineTo(cs.x - 14, cs.y + floatY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.fillStyle = '#f5b932';
+    ctx.font = 'bold 9.5px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(cs.active ? '✓ ABERTO' : cs.title, cs.x, cs.y - 22 + floatY);
+  });
 
   // 5. Heras e Trepadeiras Verdes penduradas nas pedras azuis (Igual à foto!)
   ivies.forEach(iv => drawLushIvy(iv.x, iv.y, iv.w, iv.h));
@@ -1907,10 +2926,17 @@ function renderScene() {
 
   // Placas de Dica nas salas
   ctx.fillStyle = 'rgba(13, 31, 48, 0.82)';
-  ctx.fillRect(195, 290, 150, 22);
-  ctx.fillStyle = '#f5b932';
-  ctx.font = 'bold 10px sans-serif';
-  ctx.fillText('⬆️ Pule nas paredes p/ subir!', 270, 305);
+  if (stageIdx === 0) {
+    ctx.fillRect(195, 290, 150, 22);
+    ctx.fillStyle = '#f5b932';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText('⬆️ Pule nas paredes p/ subir!', 270, 305);
+  } else {
+    ctx.fillRect(150, 310, 195, 22);
+    ctx.fillStyle = '#7fd4ff';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.fillText('🛗 Use os Elevadores e Cristais 💎!', 247, 325);
+  }
 
   // 13. Herói Prince of Persia + Golpe de Cimitarra de Luz + Adaga Mágica
   if (player.invuln % 4 < 2) {
@@ -1946,8 +2972,366 @@ function renderScene() {
 
   ctx.restore();
 
-  // 15. MEDALHÃO ORNAMENTAL DO CANTO DIREITO (Idêntico à interface da imagem!)
+  // 15. MEDALHÃO ORNAMENTAL DO CANTO DIREITO + BANNER DE FASE
   drawPersianCornerHUD();
+  drawStageBanner();
+}
+
+// ============================================================================
+// RENDERIZAÇÃO DA FASE 3: CORRIDA DE CARRINHO NOS TRILHOS DA ACESSIBILIDADE
+// ============================================================================
+function renderStage3Cart() {
+  const scrollX = Math.floor(cart.dist * 0.6) % 96;
+
+  // Fundo de Caverna/Aqueduto Persa em Movimento Rápido
+  if (sandstonePattern) {
+    ctx.save();
+    ctx.translate(-scrollX, 0);
+    ctx.fillStyle = sandstonePattern;
+    ctx.fillRect(0, 0, canvas.width + 120, canvas.height);
+    ctx.restore();
+  }
+  ctx.fillStyle = 'rgba(12, 28, 38, 0.72)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Arcos Persas passando em Parallax no fundo
+  const archOffset = Math.floor(cart.dist * 0.4) % 320;
+  for (let ax = -archOffset; ax < canvas.width + 320; ax += 320) {
+    ctx.fillStyle = '#1b2e3d';
+    ctx.fillRect(ax, 0, 44, canvas.height);
+    ctx.strokeStyle = '#f5b932';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(ax + 4, 0, 36, canvas.height);
+  }
+
+  // Desenha os 3 Trilhos de Aço e Dormentes de Madeira/Pedra
+  const tieOffset = Math.floor(cart.dist) % 48;
+  CART_LANES.forEach((ly, laneIdx) => {
+    // Base de pedra do trilho
+    ctx.fillStyle = '#253544';
+    ctx.fillRect(0, ly + 6, canvas.width, 22);
+
+    // Dormentes passando rápido
+    ctx.fillStyle = '#5c3d24';
+    for (let tx = -tieOffset; tx < canvas.width + 48; tx += 48) {
+      ctx.fillRect(tx, ly + 4, 16, 20);
+    }
+
+    // Trilho metálico brilhante
+    ctx.fillStyle = laneIdx === cart.lane ? '#f5b932' : '#94a3b8';
+    ctx.fillRect(0, ly + 8, canvas.width, 5);
+    ctx.fillStyle = '#cbd5e1';
+    ctx.fillRect(0, ly + 8, canvas.width, 2);
+  });
+
+  // Renderiza Obstáculos nos Trilhos
+  cart.obstacles.forEach(ob => {
+    if (ob.hp <= 0) return;
+    const sx = ob.x - cart.dist + 190;
+    if (sx < -100 || sx > canvas.width + 100) return;
+    const sy = CART_LANES[ob.lane];
+
+    if (ob.type === 'gap') {
+      // Buraco / Trilho Quebrado
+      ctx.fillStyle = '#070b10';
+      ctx.fillRect(sx - 28, sy + 2, 64, 28);
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(sx - 28, sy + 2, 64, 28);
+      ctx.fillStyle = '#f87171';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('⚠️ PULE (A)', sx + 4, sy - 6);
+    } else if (ob.type === 'enemyCart') {
+      // Vagão inimigo vindo na contramão
+      ctx.fillStyle = '#7f1d1d';
+      ctx.fillRect(sx - 24, sy - 28, 52, 32);
+      ctx.strokeStyle = '#f5b932';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(sx - 24, sy - 28, 52, 32);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('👹 ' + ob.label, sx + 2, sy - 34);
+    } else {
+      // Barreira do Capacitismo (Destrutível com B)
+      ctx.fillStyle = '#3f4238';
+      ctx.fillRect(sx - 18, sy - 36, 36, 42);
+      ctx.strokeStyle = '#f5b932';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(sx - 18, sy - 36, 36, 42);
+      ctx.fillStyle = '#e74c3c';
+      ctx.fillRect(sx - 12, sy - 24, 24, 8);
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 9.5px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(ob.label, sx, sy - 42);
+    }
+  });
+
+  // Renderiza Itens, Rampas e Grimórios (?) nos Trilhos
+  cart.items.forEach(it => {
+    if (it.collected) return;
+    const sx = it.x - cart.dist + 190;
+    if (sx < -80 || sx > canvas.width + 80) return;
+    const sy = CART_LANES[it.lane];
+
+    if (it.type === 'grimoire') {
+      const bob = Math.sin(player.animTick * 0.15) * 5;
+      ctx.fillStyle = '#f5b932';
+      ctx.fillRect(sx - 17, sy - 42 + bob, 34, 34);
+      ctx.strokeStyle = '#54216b';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(sx - 17, sy - 42 + bob, 34, 34);
+      ctx.fillStyle = '#1a1124';
+      ctx.font = '900 22px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('?', sx, sy - 17 + bob);
+    } else if (it.type === 'ramp') {
+      ctx.fillStyle = '#2ecc71';
+      ctx.beginPath();
+      ctx.moveTo(sx - 24, sy + 8);
+      ctx.lineTo(sx + 24, sy - 18);
+      ctx.lineTo(sx + 24, sy + 8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('♿ RAMPA', sx, sy - 22);
+    } else {
+      ctx.font = '20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(it.type === 'heart' ? '❤️' : '♿', sx, sy - 12);
+    }
+  });
+
+  // Desenha o HERÓI DENTRO DO CARRINHO REAL PERSA 30 ANOS!
+  const cx = 190;
+  const cy = cart.y;
+  drawPrinceHero(ctx, cx + 10, cy - 52, selectedHero, 1, player.animTick, 0, false, cart.rampBoost > 0);
+
+  // Corpo da Vagoneta Persa Azul e Dourada
+  ctx.fillStyle = cart.rampBoost > 0 ? '#d97706' : '#1e3a5f';
+  ctx.beginPath();
+  ctx.moveTo(cx - 8, cy - 26);
+  ctx.lineTo(cx + 62, cy - 26);
+  ctx.lineTo(cx + 52, cy + 4);
+  ctx.lineTo(cx + 2, cy + 4);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#f5b932';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Emblema "30 ANOS" na lateral do carrinho
+  ctx.fillStyle = '#f5b932';
+  ctx.font = '900 10px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('30 ANOS', cx + 27, cy - 8);
+
+  // Rodas de ferro girando
+  [cx + 8, cx + 44].forEach(wx => {
+    ctx.fillStyle = '#0f172a';
+    ctx.beginPath();
+    ctx.arc(wx, cy + 6, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#f5b932';
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+  });
+
+  // Golpe de Cimitarra a partir do Carrinho
+  if (player.actionTimer > 0) {
+    ctx.strokeStyle = '#f5b932';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(cx + 58, cy - 24, 32, -0.9, 0.9);
+    ctx.stroke();
+  }
+
+  // Faíscas nos trilhos
+  cart.sparks.forEach(s => {
+    ctx.fillStyle = '#fde047';
+    ctx.fillRect(s.x, s.y, 4, 4);
+  });
+
+  // Barra de Progresso do Túnel no Topo
+  const pct = Math.min(1, cart.dist / cart.maxDist);
+  ctx.fillStyle = 'rgba(13, 31, 48, 0.9)';
+  ctx.fillRect(220, 14, 520, 28);
+  ctx.strokeStyle = '#f5b932';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(220, 14, 520, 28);
+  ctx.fillStyle = '#2ecc71';
+  ctx.fillRect(224, 18, (512) * pct, 20);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(`🚋 FERROVIA DA INCLUSÃO: ${Math.floor(pct * 100)}% (▲/▼ Troca Trilho | A Pula | B Rebate)`, 480, 32);
+
+  particles.forEach(pt => {
+    ctx.fillStyle = pt.color;
+    ctx.font = '900 13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(pt.txt, pt.x, pt.y);
+  });
+}
+
+// ============================================================================
+// RENDERIZAÇÃO DA FASE 4: SANTUÁRIO DO RESPEITO (PEGAR ITENS NA TELA)
+// ============================================================================
+function renderStage4Catch() {
+  // Parede de fundo do Santuário Real
+  if (sandstonePattern) {
+    ctx.fillStyle = sandstonePattern;
+    ctx.fillRect(0, 0, canvas.width, GROUND_Y);
+  }
+  const grad = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+  grad.addColorStop(0, 'rgba(42, 14, 58, 0.72)');
+  grad.addColorStop(1, 'rgba(15, 23, 34, 0.5)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, canvas.width, GROUND_Y);
+
+  // Colunas Persas Monumentais de Fundo
+  [90, 320, 640, 870].forEach(cx => {
+    drawSlateBlockStructure(cx - 22, 65, 44, GROUND_Y - 65, false);
+  });
+
+  // Balcão Superior onde a Sombra do Assédio se move
+  drawSlateBlockStructure(80, 78, canvas.width - 160, 18, true);
+
+  // Desenha o Chefão "Sombra do Assédio" no topo lançando desafios
+  ctx.save();
+  ctx.translate(sanctuary.bossX, 32);
+  ctx.fillStyle = 'rgba(192, 38, 211, 0.35)';
+  ctx.beginPath();
+  ctx.arc(20, 24, 28 + Math.sin(sanctuary.bossAnim * 0.15) * 4, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#3b0764';
+  ctx.fillRect(6, 8, 28, 36);
+  ctx.fillStyle = '#f5b932';
+  ctx.fillRect(6, 8, 28, 4);
+  ctx.fillStyle = '#ff2a85';
+  ctx.fillRect(12, 16, 5, 4);
+  ctx.fillRect(23, 16, 5, 4);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 10px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('👹 Tirano do Assédio', 20, -4);
+  ctx.restore();
+
+  // Chão e Pedestais Laterais
+  drawSlateBlockStructure(0, GROUND_Y, canvas.width, canvas.height - GROUND_Y, true);
+  platforms.forEach(p => drawSlateBlockStructure(p.x, p.y, p.w, p.h, true));
+
+  // Portal da Vitória no Centro (Abre após pegar os itens e responder os 3 Grimórios)
+  ctx.fillStyle = exitPortal.open ? '#1b4d3e' : 'rgba(38, 50, 61, 0.65)';
+  ctx.beginPath();
+  ctx.arc(exitPortal.x + exitPortal.w / 2, exitPortal.y + 30, exitPortal.w / 2, Math.PI, 0);
+  ctx.lineTo(exitPortal.x + exitPortal.w, exitPortal.y + exitPortal.h);
+  ctx.lineTo(exitPortal.x, exitPortal.y + exitPortal.h);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = exitPortal.open ? '#4ade80' : '#f5b932';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.fillStyle = '#f5b932';
+  ctx.font = 'bold 10px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(exitPortal.open ? 'ENTRAR ▶' : 'OUVIDORIA', exitPortal.x + exitPortal.w / 2, exitPortal.y + 58);
+
+  // Renderiza os Itens Caindo na Tela (Bons com halo dourado/verde, Maus com halo vermelho)
+  sanctuary.fallingItems.forEach(it => {
+    ctx.save();
+    ctx.translate(it.x, it.y);
+
+    if (it.isGrimoire) {
+      ctx.fillStyle = '#f5b932';
+      ctx.fillRect(-17, -17, 34, 34);
+      ctx.strokeStyle = '#54216b';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(-17, -17, 34, 34);
+      ctx.fillStyle = '#1a1124';
+      ctx.font = '900 22px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('?', 0, 8);
+    } else {
+      ctx.fillStyle = it.good ? 'rgba(46, 204, 113, 0.25)' : 'rgba(239, 68, 68, 0.32)';
+      ctx.beginPath();
+      ctx.arc(0, 0, 22, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = it.good ? '#4ade80' : '#ef4444';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.font = '20px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(it.icon, 0, 7);
+
+      ctx.fillStyle = it.color;
+      ctx.font = 'bold 9.5px sans-serif';
+      ctx.fillText(it.label, 0, -26);
+    }
+    ctx.restore();
+  });
+
+  // Desenha o Herói e a Cimitarra de Luz
+  if (player.invuln % 4 < 2) {
+    drawPrinceHero(ctx, player.x, player.y, selectedHero, player.facing, player.animTick, 0, player.mounted, sanctuary.magnetTimer > 0);
+  }
+
+  if (player.actionTimer > 0) {
+    const sx = player.facing === 1 ? player.x + player.w : player.x - 48;
+    ctx.strokeStyle = '#7fd4ff';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(sx + (player.facing === 1 ? 10 : 38), player.y + 24, 28, -0.9, 0.9, player.facing === -1);
+    ctx.stroke();
+  }
+
+  // Painel de Progresso de Captura no Topo
+  const pct = Math.min(1, sanctuary.caughtCount / sanctuary.targetCount);
+  ctx.fillStyle = 'rgba(13, 31, 48, 0.92)';
+  ctx.fillRect(190, 12, 580, 28);
+  ctx.strokeStyle = '#f5b932';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(190, 12, 580, 28);
+  ctx.fillStyle = '#a855f7';
+  ctx.fillRect(194, 16, 572 * pct, 20);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(`🛡️ ITENS DE RESPEITO CAPTURADOS: ${sanctuary.caughtCount}/${sanctuary.targetCount} | Grimórios: ${grimoires.filter(g => g.got).length}/3 (B Rebate Ameaças | X Ímã)`, 480, 30);
+
+  particles.forEach(pt => {
+    ctx.fillStyle = pt.color;
+    ctx.font = '900 13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(pt.txt, pt.x, pt.y);
+  });
+}
+
+// Banner de Introdução que explica o desafio de cada Fase ao iniciar
+function drawStageBanner() {
+  if (stageBannerTimer <= 0) return;
+  const descriptions = [
+    '🧗 FASE 1: Escale a chaminé com Wall Jump e empurre o bloco na placa!',
+    '🛗 FASE 2: Suba nos Elevadores Móveis e ative os Cristais de Sigilo!',
+    '🚋 FASE 3: JOGO DE CARRINHO! Use ▲/▼ p/ trocar de trilho, A p/ Pular e B p/ atacar!',
+    '🛡️ FASE 4: PEGUE OS ITENS BONS no ar e rebata as ameaças vermelhas com B!'
+  ];
+  ctx.save();
+  ctx.fillStyle = 'rgba(11, 25, 38, 0.92)';
+  ctx.fillRect(canvas.width / 2 - 310, 52, 620, 42);
+  ctx.strokeStyle = '#f5b932';
+  ctx.lineWidth = 2.5;
+  ctx.strokeRect(canvas.width / 2 - 310, 52, 620, 42);
+  ctx.fillStyle = '#f5b932';
+  ctx.font = '900 13.5px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(descriptions[stageIdx], canvas.width / 2, 78);
+  ctx.restore();
 }
 
 // Desenha os blocos de pedra azul-ardósia com relevo e friso ornamental iguais à foto
@@ -2039,7 +3423,13 @@ function updateHUD() {
   $('hud-lvl').textContent = rpgLvl;
   $('hud-hp').textContent = hp;
   $('hud-mp').textContent = mp;
-  $('hud-gates').textContent = `${gates.filter(g => g.open).length}/${gates.length}`;
+  if (stageIdx === 2) {
+    $('hud-gates').textContent = `${Math.min(100, Math.floor((cart.dist / cart.maxDist) * 100))}%`;
+  } else if (stageIdx === 3) {
+    $('hud-gates').textContent = `${sanctuary.caughtCount}/${sanctuary.targetCount}`;
+  } else {
+    $('hud-gates').textContent = `${gates.filter(g => g.open).length}/${gates.length}`;
+  }
   $('hud-books').textContent = `${grimoires.filter(g => g.got).length}/3`;
   $('hud-score').textContent = score;
 }
@@ -2079,6 +3469,7 @@ function handleQuizAnswer(i, btn, q) {
 
   if (i === q.ans) {
     quizCompleted = true;
+    SoundEngine.sfx.quizCorrect();
     const pts = quizAttempts === 1 ? 150 : 80;
     score += pts;
     gainXP(60);
@@ -2091,6 +3482,7 @@ function handleQuizAnswer(i, btn, q) {
     $('btn-q-next').classList.remove('hidden');
     updateHUD();
   } else {
+    SoundEngine.sfx.quizWrong();
     btn.classList.add('wrong');
     btn.disabled = true;
     fb.className = 'feedback-banner bad';
@@ -2098,7 +3490,7 @@ function handleQuizAnswer(i, btn, q) {
   }
 }
 
-$('btn-q-next').onclick = () => showScreen('play');
+$('btn-q-next').onclick = () => { SoundEngine.sfx.click(); showScreen('play'); };
 
 // RANKING LOCALSTORAGE
 function getRankList() {
@@ -2140,6 +3532,7 @@ function formatClock(sec) {
 
 function finishAdventure() {
   clearInterval(timerId);
+  SoundEngine.sfx.victory();
   const speedBonus = Math.max(0, 320 - elapsedSec) * 2;
   score += speedBonus;
   saveRankEntry({ name: playerName, unit: playerUnit, hero: selectedHero.name, score, time: formatClock(elapsedSec) });
@@ -2170,7 +3563,7 @@ function initHeroCards() {
     sub.textContent = h.role;
 
     card.append(miniCanvas, title, sub);
-    card.onclick = () => { selectedHero = h; initHeroCards(); };
+    card.onclick = () => { SoundEngine.sfx.click(); selectedHero = h; initHeroCards(); };
     box.appendChild(card);
   });
 }
@@ -2207,18 +3600,22 @@ async function requestLandscapeFullscreen(forceToggle = false) {
 
 // EVENTOS DE NAVEGAÇÃO
 $('btn-go-setup').onclick = () => {
+  SoundEngine.sfx.click();
   requestLandscapeFullscreen(false);
   showScreen('setup');
 };
-$('btn-home-fullscreen').onclick = () => requestLandscapeFullscreen(true);
-$('btn-hud-fullscreen').onclick = () => requestLandscapeFullscreen(true);
-$('btn-force-landscape').onclick = () => requestLandscapeFullscreen(false);
-$('btn-setup-back').onclick = () => showScreen('home');
-$('btn-go-ranking').onclick = () => { renderRankTable($('standalone-ranking-box')); showScreen('ranking-screen'); };
-$('btn-rank-back').onclick = () => showScreen('home');
-$('btn-rank-clear').onclick = () => { localStorage.removeItem('comunita_persia_rank_v2'); renderRankTable($('standalone-ranking-box')); };
+$('btn-home-fullscreen').onclick = () => { SoundEngine.sfx.click(); requestLandscapeFullscreen(true); };
+$('btn-hud-fullscreen').onclick = () => { SoundEngine.sfx.click(); requestLandscapeFullscreen(true); };
+$('btn-home-sound').onclick = () => SoundEngine.toggleMute();
+$('btn-hud-sound').onclick = () => SoundEngine.toggleMute();
+$('btn-force-landscape').onclick = () => { SoundEngine.sfx.click(); requestLandscapeFullscreen(false); };
+$('btn-setup-back').onclick = () => { SoundEngine.sfx.click(); showScreen('home'); };
+$('btn-go-ranking').onclick = () => { SoundEngine.sfx.click(); renderRankTable($('standalone-ranking-box')); showScreen('ranking-screen'); };
+$('btn-rank-back').onclick = () => { SoundEngine.sfx.click(); showScreen('home'); };
+$('btn-rank-clear').onclick = () => { SoundEngine.sfx.click(); localStorage.removeItem('comunita_persia_rank_v2'); renderRankTable($('standalone-ranking-box')); };
 
 $('btn-start-play').onclick = () => {
+  SoundEngine.sfx.click();
   requestLandscapeFullscreen(false);
   playerName = $('inp-name').value.trim() || 'Guardião Comunitá';
   playerUnit = $('inp-unit').value.trim() || 'Rede Comunitá';
@@ -2233,19 +3630,27 @@ $('btn-start-play').onclick = () => {
 };
 
 $('btn-reset-room').onclick = () => {
-  player.x = 55; player.y = 370; player.vx = 0; player.vy = 0;
-  pushBlocks[0].x = 730;
+  SoundEngine.sfx.click();
+  buildStage();
 };
-$('btn-quit').onclick = () => { clearInterval(timerId); showScreen('home'); };
-$('gb-start').onclick = () => { clearInterval(timerId); showScreen('home'); };
-$('gb-select').onclick = () => { renderRankTable($('standalone-ranking-box')); showScreen('ranking-screen'); };
-$('btn-play-again').onclick = () => showScreen('setup');
-$('btn-res-home').onclick = () => showScreen('home');
+$('btn-quit').onclick = () => { SoundEngine.sfx.click(); clearInterval(timerId); showScreen('home'); };
+$('gb-start').onclick = () => { SoundEngine.sfx.click(); clearInterval(timerId); showScreen('home'); };
+$('gb-select').onclick = () => { SoundEngine.sfx.click(); renderRankTable($('standalone-ranking-box')); showScreen('ranking-screen'); };
+$('btn-play-again').onclick = () => { SoundEngine.sfx.click(); showScreen('setup'); };
+$('btn-res-home').onclick = () => { SoundEngine.sfx.click(); showScreen('home'); };
 
-$('btn-copy-score').onclick = async () => {
-  const txt = `🗡️ *MISSÃO COMUNITÁ 30 ANOS (PRINCE OF PERSIA)*\n👤 Colaborador: ${playerName} (${playerUnit})\n🦸 Herói: ${selectedHero.name}\n⭐ Score: ${score} pts | Acertos de 1ª: ${firstTryCount}/12\n⏱️ Tempo: ${formatClock(elapsedSec)}\nVenha superar meu recorde no Templo do Saber!`;
+$('btn-copy-score').onclick = () => {
+  SoundEngine.sfx.click();
+  const txt = `🏆 *MISSÃO COMUNITÁ 30 ANOS — PRINCE OF PERSIA*\n👤 Colaborador(a): ${playerName} (${playerUnit})\n🗡️ Herói: ${selectedHero.name}\n⭐ Score: ${score} pts | Acertos de 1ª: ${firstTryCount}/12\n⏱️ Tempo: ${formatClock(elapsedSec)}\nJogue também e supere meu recorde!`;
   try {
-    await navigator.clipboard.writeText(txt);
+    const ta = document.createElement('textarea');
+    ta.value = txt;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
     $('copy-msg').textContent = '✅ Placar copiado para colar no WhatsApp!';
   } catch {
     $('copy-msg').textContent = txt;

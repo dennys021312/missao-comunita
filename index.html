@@ -2,17 +2,19 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Missão Comunitá — Guardiões da Cultura (30 Anos)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d1f30" />
+  <title>Missão Comunitá 30 Anos — Edição Prince of Persia</title>
   <style>
     :root {
-      --purple: #35134c;
-      --purple-dark: #1c1028;
-      --orange: #ff6b22;
-      --gold: #ffc928;
-      --cream: #fff9ef;
-      --ink: #24172d;
-      --muted: #706579;
+      --persia-navy: #0d1f30;
+      --persia-slate: #2c3a47;
+      --persia-sand: #cbb28c;
+      --persia-gold: #f5b932;
+      --persia-orange: #e65c19;
+      --persia-crimson: #9e1b24;
+      --purple-rc: #54216b;
+      --cream: #f7f0e4;
     }
 
     * {
@@ -21,175 +23,153 @@
       padding: 0;
       user-select: none;
       -webkit-user-select: none;
-      font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+      -webkit-touch-callout: none;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       touch-action: manipulation;
     }
 
     body {
-      background: radial-gradient(circle at 15% 5%, #75418b 0, var(--purple) 43%, var(--purple-dark) 100%);
-      color: var(--ink);
-      min-height: 100vh;
+      background: radial-gradient(circle at 50% 15%, #1d354d 0%, #09131d 100%);
+      color: var(--cream);
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 10px;
+      padding: 6px;
       overflow-x: hidden;
     }
 
     .shell {
       width: 100%;
-      max-width: 960px;
+      max-width: 1040px;
       margin: auto;
     }
 
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: white;
-      margin-bottom: 10px;
-      padding: 0 5px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 900;
-      font-size: 14px;
-      letter-spacing: .02em;
-    }
-
-    .brand-mark {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      background: linear-gradient(145deg, var(--gold), var(--orange));
-      display: grid;
-      place-items: center;
-      color: var(--purple);
-      font-size: 20px;
-    }
-
-    .brand small {
-      display: block;
-      color: #e7d8ef;
-      font-weight: 600;
-      font-size: 10px;
-    }
-
-    .game {
+    /* MOLDURA AZUL E DOURADA ESTILO PRINCE OF PERSIA DA IMAGEM */
+    .game-frame {
       position: relative;
-      background: var(--cream);
-      border: 2px solid #ffffff70;
-      border-radius: 18px;
+      background: #141c24;
+      border: 4px solid #1f4868;
+      outline: 2px solid var(--persia-gold);
+      border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 20px 50px #13091d90;
+      box-shadow: 0 25px 75px rgba(0, 0, 0, 0.9);
       width: 100%;
     }
 
     .screen {
-      padding: clamp(16px, 3vw, 32px);
+      padding: clamp(18px, 3.5vw, 36px);
       text-align: center;
+      background:
+        radial-gradient(circle at 80% 20%, rgba(245, 185, 50, 0.12), transparent 45%),
+        linear-gradient(135deg, #162432 0%, #0d161f 100%);
+      min-height: 530px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
     .hidden {
       display: none !important;
     }
 
+    .eyebrow {
+      display: inline-block;
+      background: rgba(245, 185, 50, 0.16);
+      color: var(--persia-gold);
+      border: 1px solid rgba(245, 185, 50, 0.45);
+      padding: 5px 14px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
     h1 {
-      font-size: clamp(26px, 5vw, 44px);
-      color: var(--purple);
-      margin: 10px 0;
+      font-size: clamp(28px, 5vw, 46px);
+      color: var(--cream);
+      line-height: 1.05;
+      margin-bottom: 10px;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
     }
 
     h1 em {
-      color: var(--orange);
+      color: var(--persia-gold);
       font-style: normal;
     }
 
-    p {
-      color: var(--muted);
+    h2 {
+      font-size: clamp(21px, 3.5vw, 30px);
+      color: var(--persia-gold);
+      margin-bottom: 8px;
+    }
+
+    p.sub {
+      color: #c7d2de;
       font-size: clamp(13px, 2vw, 15px);
-      margin-bottom: 16px;
-      line-height: 1.4;
+      max-width: 670px;
+      margin: 0 auto 18px;
+      line-height: 1.5;
+    }
+
+    .feature-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+
+    .feature-pill {
+      background: rgba(44, 58, 71, 0.75);
+      border: 1px solid #486178;
+      color: #e9f0f7;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
     }
 
     .btn {
       border: 0;
-      border-radius: 12px;
-      padding: 12px 20px;
-      font-weight: 850;
-      font-size: 15px;
+      border-radius: 10px;
+      padding: 12px 22px;
+      font-weight: 900;
+      font-size: 14px;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      transition: transform 0.1s, filter 0.1s;
+      transition: transform 0.12s, filter 0.12s;
     }
 
-    .btn:active {
-      transform: scale(0.96);
+    .btn:active { transform: scale(0.96); }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--persia-gold), var(--persia-orange));
+      color: #16120c;
+      box-shadow: 0 4px 0 #94390a;
     }
 
-    .primary {
-      background: linear-gradient(135deg, var(--orange), #ff9b22);
-      color: #2b1537;
-      box-shadow: 0 4px 0 #cf4c10;
+    .btn.secondary {
+      background: #233342;
+      color: var(--cream);
+      border: 1px solid #48647d;
     }
 
-    .secondary {
-      background: #fff;
-      color: var(--purple);
-      border: 1px solid #d9c6e2;
-    }
-
-    .heroes {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 8px;
-      margin: 14px 0 20px;
-    }
-
-    .hero-choice {
-      border: 2px solid #e2d4e8;
-      border-radius: 12px;
-      background: white;
-      padding: 10px 6px;
-      text-align: center;
-      cursor: pointer;
-    }
-
-    .hero-choice[aria-pressed="true"] {
-      border-color: var(--orange);
-      background: #fff2e7;
-      box-shadow: 0 0 0 2px #ff6b2233;
-    }
-
-    .avatar {
-      font-size: 30px;
-      margin-bottom: 4px;
-    }
-
-    .hero-choice b {
-      display: block;
-      color: var(--purple);
-      font-size: 13px;
-    }
-
-    .hero-choice small {
-      display: block;
-      color: var(--muted);
-      font-size: 10px;
-    }
-
+    /* FORMULÁRIO E SELEÇÃO DE HERÓIS */
     .form-grid {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      max-width: 450px;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      max-width: 580px;
+      width: 100%;
       margin: 0 auto 16px;
       text-align: left;
     }
@@ -198,865 +178,1785 @@
       display: block;
       font-size: 12px;
       font-weight: 800;
-      margin-bottom: 4px;
-      color: var(--purple);
+      color: var(--persia-gold);
+      margin-bottom: 5px;
     }
 
     .field input {
       width: 100%;
-      padding: 10px 12px;
-      border: 1px solid #d5c8dc;
-      border-radius: 10px;
+      padding: 10px 13px;
+      background: #0d161f;
+      border: 2px solid #3c546b;
+      border-radius: 8px;
+      color: #fff;
       font-size: 14px;
+      user-select: text;
+      -webkit-user-select: text;
     }
 
-    /* HUD DO JOGO */
+    .heroes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+      gap: 10px;
+      max-width: 820px;
+      width: 100%;
+      margin: 10px auto 20px;
+    }
+
+    .hero-card {
+      border: 2px solid #3c546b;
+      border-radius: 12px;
+      background: #162432;
+      padding: 10px 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .hero-card.active {
+      border-color: var(--persia-gold);
+      background: #24384d;
+      box-shadow: 0 0 0 3px rgba(245, 185, 50, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .hero-card canvas {
+      width: 54px;
+      height: 58px;
+      margin: 0 auto 5px;
+      display: block;
+      image-rendering: pixelated;
+    }
+
+    .hero-card b { display: block; font-size: 13px; color: #fff; }
+    .hero-card small { display: block; font-size: 10px; color: #b2c2d1; }
+
+    /* HUD SUPERIOR ESTILO PALÁCIO PERSA */
     .hud {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 6px;
-      background: var(--purple);
+      background: linear-gradient(90deg, #0b1926 0%, #162f45 50%, #0b1926 100%);
       color: #fff;
-      padding: 8px 12px;
-      font-size: 11px;
+      padding: 7px 12px;
+      font-size: 11.5px;
+      border-bottom: 3px solid var(--persia-gold);
     }
 
-    .hud-stats {
+    .hud-group {
       display: flex;
       flex-wrap: wrap;
-      gap: 5px;
+      gap: 6px;
+      align-items: center;
     }
 
-    .stat {
-      border: 1px solid #ffffff26;
-      background: #ffffff10;
+    .stat-pill {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(245, 185, 50, 0.4);
       border-radius: 6px;
-      padding: 4px 7px;
+      padding: 3px 8px;
+      font-weight: 700;
     }
 
-    .stat strong {
-      color: var(--gold);
-    }
+    .stat-pill strong { color: var(--persia-gold); }
 
-    /* PALCO CANVAS 2D PIXEL ART */
-    .stage {
+    /* PALCO DO JOGO + OVERLAY GAME BOY 30% TRANSPARENTE */
+    .stage-wrap {
       position: relative;
-      background: #7ec0ee;
       width: 100%;
+      background: #1b232b;
       overflow: hidden;
+      aspect-ratio: 16 / 9;
+      max-height: 78dvh;
     }
 
-    canvas {
-      display: block;
+    #gameCanvas {
       width: 100%;
-      height: auto;
-      aspect-ratio: 16 / 9;
+      height: 100%;
+      display: block;
       image-rendering: pixelated;
     }
 
-    /* CONTROLES TÁTEIS PARA CELULAR */
-    .touch-controls {
+    /* CONTROLES GAME BOY COM 30% DE TRANSPARÊNCIA NA TELA */
+    .gb-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: clamp(8px, 2vw, 18px);
+      z-index: 10;
+    }
+
+    .gb-bottom-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 10px 14px;
-      background: #f2e6fc;
-      border-top: 1px solid #e1d0ed;
+      align-items: flex-end;
+      width: 100%;
     }
 
-    .dpad, .actions-pad {
-      display: flex;
-      gap: 8px;
+    .gb-dpad {
+      position: relative;
+      width: clamp(118px, 25vw, 148px);
+      height: clamp(118px, 25vw, 148px);
+      opacity: 0.30;
+      pointer-events: auto;
+      transition: opacity 0.15s;
     }
+    .gb-dpad:active { opacity: 0.65; }
 
-    .t-btn {
-      background: var(--purple);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      width: 50px;
-      height: 48px;
-      font-size: 18px;
-      font-weight: 900;
+    .dpad-btn {
+      position: absolute;
+      background: #182634;
+      border: 2px solid #f5b932;
+      color: #fff;
       display: grid;
       place-items: center;
-      box-shadow: 0 4px 0 #1c1028;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.7);
+    }
+    .dpad-btn:active { background: var(--persia-orange); }
+
+    .dpad-up { top: 0; left: 33.3%; width: 33.3%; height: 36%; border-radius: 8px 8px 0 0; }
+    .dpad-down { bottom: 0; left: 33.3%; width: 33.3%; height: 36%; border-radius: 0 0 8px 8px; }
+    .dpad-left { top: 33.3%; left: 0; width: 36%; height: 33.3%; border-radius: 8px 0 0 8px; }
+    .dpad-right { top: 33.3%; right: 0; width: 36%; height: 33.3%; border-radius: 0 8px 8px 0; }
+    .dpad-center { top: 33.3%; left: 33.3%; width: 33.3%; height: 33.3%; background: #182634; pointer-events: none; }
+
+    .gb-center-btns {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 6px;
+      opacity: 0.30;
+      pointer-events: auto;
+    }
+    .gb-center-btns:active { opacity: 0.65; }
+
+    .gb-pill-btn {
+      background: #182634;
+      color: #fff;
+      border: 2px solid #f5b932;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 9px;
+      font-weight: 900;
+      transform: rotate(-18deg);
       cursor: pointer;
     }
 
-    .t-btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 1px 0 #1c1028;
-      background: var(--orange);
+    .gb-actions {
+      position: relative;
+      width: clamp(135px, 28vw, 170px);
+      height: clamp(115px, 24vw, 140px);
+      opacity: 0.30;
+      pointer-events: auto;
+      transition: opacity 0.15s;
     }
+    .gb-actions:active { opacity: 0.65; }
 
-    .t-btn.wide {
-      width: 75px;
+    .gb-round-btn {
+      position: absolute;
+      width: clamp(48px, 10vw, 58px);
+      height: clamp(48px, 10vw, 58px);
+      border-radius: 50%;
+      border: 2px solid #f5b932;
+      color: #fff;
+      font-weight: 900;
       font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.7);
     }
+    .gb-round-btn small { font-size: 7px; font-weight: 800; opacity: 0.95; }
+    .gb-round-btn:active { transform: scale(0.92); background: var(--persia-gold) !important; color: #000; }
 
-    /* TELA DE QUIZ RPG */
-    .quiz-wrap {
-      max-width: 650px;
+    .btn-b { bottom: 8px; left: 4px; background: #9e1b24; }
+    .btn-a { bottom: 32px; right: 4px; background: #c94914; }
+    .btn-x { top: 0; left: 38px; background: #54216b; }
+
+    /* MODAL DE QUIZ */
+    .quiz-card {
+      max-width: 660px;
+      width: 100%;
       margin: auto;
       text-align: left;
+      background: #162432;
+      border: 2px solid var(--persia-gold);
+      border-radius: 14px;
+      padding: 20px;
     }
 
-    .quiz-head {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      color: var(--purple);
-      font-size: 11px;
-      font-weight: 900;
-      text-transform: uppercase;
-    }
-
-    .quiz-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 10px;
-      background: #f3e4fa;
-      display: grid;
-      place-items: center;
-      font-size: 20px;
-    }
-
-    .quiz-wrap h2 {
-      font-size: clamp(18px, 3vw, 26px);
-      color: var(--purple);
-      margin: 10px 0;
-    }
-
-    .knowledge {
-      background: #fff3d1;
-      border-left: 4px solid var(--gold);
-      padding: 10px 12px;
+    .knowledge-box {
+      background: #213547;
+      border-left: 5px solid var(--persia-gold);
+      padding: 13px;
       border-radius: 0 10px 10px 0;
-      color: #57451d;
-      font-size: 13px;
-      margin: 10px 0;
+      margin: 10px 0 14px;
+      font-size: 13.5px;
+      color: #f0f4f8;
     }
 
-    .options {
+    .quiz-options {
       display: grid;
-      gap: 8px;
+      gap: 9px;
       margin: 12px 0;
     }
 
-    .option {
-      border: 1px solid #d9cde0;
+    .quiz-opt {
+      border: 2px solid #3c546b;
       border-radius: 10px;
-      background: #fff;
+      background: #0d161f;
+      padding: 12px 15px;
       text-align: left;
-      padding: 10px 12px;
-      color: var(--ink);
-      font-weight: 650;
-      font-size: 13px;
+      font-weight: 700;
+      font-size: 13.5px;
+      color: var(--cream);
       cursor: pointer;
+      transition: all 0.1s;
     }
+    .quiz-opt:hover:not(:disabled) { border-color: var(--persia-gold); background: #1c2d3d; }
+    .quiz-opt.correct { border-color: #2ecc71; background: #113823; }
+    .quiz-opt.wrong { border-color: #e74c3c; background: #421417; }
 
-    .option:hover:not(:disabled) {
-      border-color: var(--orange);
-      background: #fff8f1;
-    }
-
-    .option.correct {
-      border-color: #39a574;
-      background: #e9f8ef;
-    }
-
-    .option.wrong {
-      border-color: #dc6259;
-      background: #fff0ef;
-    }
-
-    .feedback {
-      padding: 10px;
+    .feedback-banner {
+      padding: 11px 14px;
       border-radius: 10px;
-      font-weight: 750;
-      font-size: 13px;
+      font-weight: 800;
+      font-size: 13.5px;
       margin: 10px 0;
     }
+    .feedback-banner.good { background: #113823; color: #4ade80; }
+    .feedback-banner.bad { background: #421417; color: #f87171; }
 
-    .feedback.good {
-      background: #e9f8ef;
-      color: #17643f;
-    }
-
-    .feedback.bad {
-      background: #fff0ef;
-      color: #8c211b;
-    }
-
-    /* RESULTADOS E RANKING */
-    .end-stats {
+    /* TABELA DE RANKING */
+    .stats-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin: 16px 0;
-    }
-
-    .metric {
-      background: white;
-      border: 1px solid #e7dce9;
-      border-radius: 12px;
-      padding: 12px 6px;
-    }
-
-    .metric strong {
-      display: block;
-      font-size: 22px;
-      color: var(--purple);
-    }
-
-    .metric span {
-      font-size: 10px;
-      color: var(--muted);
-    }
-
-    .ranking {
+      gap: 10px;
+      margin: 14px 0;
       width: 100%;
+      max-width: 600px;
+    }
+
+    .stat-card {
+      background: #162432;
+      border: 2px solid #3c546b;
+      border-radius: 12px;
+      padding: 12px 8px;
+    }
+    .stat-card strong { display: block; font-size: 22px; color: var(--persia-gold); }
+    .stat-card span { font-size: 10px; color: #b2c2d1; }
+
+    table.ranking {
+      width: 100%;
+      max-width: 650px;
       border-collapse: collapse;
-      margin: 10px 0;
+      margin: 10px auto;
+      font-size: 12.5px;
     }
-
-    .ranking th, .ranking td {
+    table.ranking th, table.ranking td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #2b3f52;
       text-align: left;
-      padding: 8px;
-      border-bottom: 1px solid #eee2ef;
-      font-size: 12px;
     }
+    table.ranking th { color: var(--persia-gold); }
 
-    .ranking th {
-      color: var(--muted);
-    }
-
-    .empty {
-      text-align: center;
-      padding: 16px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .footer {
-      color: #dfd2e8;
-      text-align: center;
-      font-size: 11px;
-      padding: 14px 8px;
+    @media (max-width: 680px) {
+      body { padding: 0; }
+      .game-frame { border-radius: 0; border: 0; min-height: 100dvh; display: flex; flex-direction: column; justify-content: center; }
+      .stage-wrap { aspect-ratio: auto; height: calc(100dvh - 46px); max-height: none; }
     }
   </style>
 </head>
 <body>
 <div class="shell">
-  <header class="topbar">
-    <div class="brand">
-      <div class="brand-mark">✿</div>
-      <div>REDE COMUNITÁ<small>30 ANOS • AÇÃO & RPG</small></div>
-    </div>
-  </header>
-
-  <main class="game">
-    <!-- TELA INICIAL -->
+  <main class="game-frame">
+    <!-- TELA 1: CAPA -->
     <section id="home" class="screen">
-      <span class="badge" style="background:#f3e5fb; color:var(--purple); padding:5px 12px; border-radius:99px; font-size:11px; font-weight:800;">✦ Aventura Pixel Art RPG</span>
-      <h1>Missão <em>Comunitá</em></h1>
-      <p>Explore as ilhas flutuantes, destrua castiçais, desvie do veneno e responda aos grimórios do saber para fortalecer a nossa rede!</p>
-      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px;">
-        <button class="btn primary" id="go-setup">Começar Missão →</button>
-        <button class="btn secondary" id="show-ranking">🏆 Hall da Comunidade</button>
+      <span class="eyebrow">✦ Edição Prince of Persia • 30 Anos Rede Comunitá</span>
+      <h1>Missão <em>Comunitá</em>: As Areias do Saber</h1>
+      <p class="sub">
+        Explore o Templo da Cidadela com gráficos inspirados no clássico <strong>Prince of Persia</strong>! Escale paredes com saltos acrobáticos (<em>Wall Jump</em>), empurre blocos de pedra sobre placas de pressão, puxe alavancas, beba nas Fontes da Empatia e responda aos Grimórios das 4 Cartilhas.
+      </p>
+
+      <div class="feature-pills">
+        <span class="feature-pill">🧗 Salto na Parede (Wall Jump)</span>
+        <span class="feature-pill">🪨 Puzzles de Blocos e Placas</span>
+        <span class="feature-pill">⛲ Fontes de Água Curativas</span>
+        <span class="feature-pill">⚔️ Lâminas, Alavancas e Guardas</span>
+        <span class="feature-pill">🎮 Controles Game Boy 30% Transparentes</span>
+      </div>
+
+      <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+        <button class="btn primary" id="btn-go-setup">▶ Entrar no Templo</button>
+        <button class="btn secondary" id="btn-go-ranking">🏆 Hall da Fama</button>
       </div>
     </section>
 
-    <!-- TELA DE SETUP E SELEÇÃO DE HERÓI -->
+    <!-- TELA 2: CADASTRO E SELEÇÃO DE HERÓI -->
     <section id="setup" class="screen hidden">
-      <h2>Escolha seu Guardião 30 Anos</h2>
-      <p>Digite seu nome e selecione o herói da sua equipe.</p>
-      
+      <span class="eyebrow">Guardiões das Areias • 30 Anos</span>
+      <h2>Escolha seu Herói da Rede Comunitá</h2>
+      <p class="sub">Identifique-se para registrar sua pontuação e disputar o topo do Hall da Fama da sua unidade.</p>
+
       <div class="form-grid">
         <div class="field">
-          <label for="player-name">Seu Nome / Agente</label>
-          <input id="player-name" maxlength="24" placeholder="Ex: Ana Silva">
+          <label for="inp-name">Nome do(a) Colaborador(a)</label>
+          <input id="inp-name" maxlength="24" placeholder="Ex.: Juliana Mendes" />
         </div>
         <div class="field">
-          <label for="player-unit">Unidade ou Setor</label>
-          <input id="player-unit" maxlength="24" placeholder="Ex: SASF Formosa">
+          <label for="inp-unit">Unidade / Programa</label>
+          <input id="inp-unit" maxlength="24" placeholder="Ex.: SASF / CEDESP / Sede" />
         </div>
       </div>
 
-      <div class="heroes" id="hero-choices"></div>
+      <div class="heroes-grid" id="heroes-list"></div>
 
       <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-        <button class="btn primary" id="start-game">Entrar na Aventura ⚔️</button>
-        <button class="btn secondary" id="back-home">Voltar</button>
+        <button class="btn primary" id="btn-start-play">Iniciar Missão 🗡️</button>
+        <button class="btn secondary" id="btn-setup-back">Voltar</button>
       </div>
     </section>
 
-    <!-- TELA DO JOGO (ACTION RPG 2D) -->
+    <!-- TELA 3: JOGO PRINCE OF PERSIA -->
     <section id="play" class="hidden">
       <div class="hud">
-        <div class="hud-stats">
-          <div class="stat">HERÓI: <strong id="hud-hero">Nina</strong></div>
-          <div class="stat">FASE: <strong id="hud-level">1/4</strong></div>
-          <div class="stat">NV: <strong id="hud-level-rpg">1</strong></div>
-          <div class="stat">XP: <strong id="hud-xp">0/100</strong></div>
-          <div class="stat">HP: <strong id="hud-hp">100</strong></div>
-          <div class="stat">MP: <strong id="hud-mp">50</strong></div>
-          <div class="stat">SCORE: <strong id="hud-score">0</strong></div>
+        <div class="hud-group">
+          <div class="stat-pill">HERÓI: <strong id="hud-hero">Nina</strong></div>
+          <div class="stat-pill">FASE: <strong id="hud-stage">1/4</strong></div>
+          <div class="stat-pill">NV: <strong id="hud-lvl">1</strong></div>
+          <div class="stat-pill">HP: <strong id="hud-hp">100</strong></div>
+          <div class="stat-pill">AREIAS (MP): <strong id="hud-mp">50</strong></div>
+          <div class="stat-pill">PORTÕES: <strong id="hud-gates">0/3</strong></div>
+          <div class="stat-pill">GRIMÓRIOS: <strong id="hud-books">0/3</strong></div>
+          <div class="stat-pill">SCORE: <strong id="hud-score">0</strong></div>
         </div>
-        <button class="btn secondary" id="quit-game" style="padding:4px 8px; font-size:11px;">Sair</button>
-      </div>
-
-      <div class="stage">
-        <canvas id="world" width="960" height="400" aria-label="Jogo de plataforma estilo Castlevania RPG"></canvas>
-      </div>
-
-      <!-- CONTROLES TÁTEIS RESPONSIVOS -->
-      <div class="touch-controls">
-        <div class="dpad">
-          <button class="t-btn" id="left-touch">◀</button>
-          <button class="t-btn" id="right-touch">▶</button>
-        </div>
-        <div class="actions-pad">
-          <button class="t-btn wide" id="attack-touch">⚔️ Atacar</button>
-          <button class="t-btn wide" id="magic-touch">✨ Magia</button>
-          <button class="t-btn" id="jump-touch">⬆</button>
+        <div style="display:flex; gap:6px;">
+          <button class="btn secondary" id="btn-reset-room" style="padding:3px 8px; font-size:11px;" title="Reiniciar posição na fase">🔄 Sala</button>
+          <button class="btn secondary" id="btn-quit" style="padding:3px 8px; font-size:11px;">🏠 Menu</button>
         </div>
       </div>
-    </section>
 
-    <!-- TELA DE QUIZ RPG -->
-    <section id="quiz" class="screen hidden">
-      <div class="quiz-wrap">
-        <div class="quiz-head">
-          <div class="quiz-icon">💡</div>
-          <div>
-            <div id="quiz-phase">Desafio do Grimório</div>
-            <p style="margin:0; color:var(--muted); font-size:11px;">Mostre que você domina a cultura da Rede Comunitá!</p>
+      <div class="stage-wrap">
+        <canvas id="gameCanvas" width="960" height="540"></canvas>
+
+        <!-- CONTROLES ESTILO GAME BOY COM 30% DE TRANSPARÊNCIA -->
+        <div class="gb-overlay">
+          <div class="gb-bottom-row">
+            <!-- D-Pad -->
+            <div class="gb-dpad">
+              <button class="dpad-btn dpad-up" id="gb-up" aria-label="Pular / Subir">▲</button>
+              <button class="dpad-btn dpad-left" id="gb-left" aria-label="Esquerda">◀</button>
+              <div class="dpad-center"></div>
+              <button class="dpad-btn dpad-right" id="gb-right" aria-label="Direita">▶</button>
+              <button class="dpad-btn dpad-down" id="gb-down" aria-label="Descer">▼</button>
+            </div>
+
+            <!-- Select / Start -->
+            <div class="gb-center-btns">
+              <button class="gb-pill-btn" id="gb-select">RANK</button>
+              <button class="gb-pill-btn" id="gb-start">MENU</button>
+            </div>
+
+            <!-- Botões B, A, X -->
+            <div class="gb-actions">
+              <button class="gb-round-btn btn-x" id="gb-x">X<small>MAGIA</small></button>
+              <button class="gb-round-btn btn-b" id="gb-b">B<small>ATAC/USAR</small></button>
+              <button class="gb-round-btn btn-a" id="gb-a">A<small>PULAR</small></button>
+            </div>
           </div>
         </div>
-        <h2 id="quiz-question">Pergunta</h2>
-        <div class="knowledge">
-          <strong id="quiz-pillar">Pilar Institucional</strong>
-          <p id="quiz-knowledge" style="margin:4px 0 0; color:#57451d;"></p>
+      </div>
+    </section>
+
+    <!-- TELA 4: QUIZ DO GRIMÓRIO -->
+    <section id="quiz" class="screen hidden">
+      <div class="quiz-card">
+        <span class="eyebrow" id="q-phase">Fase 1/4 • Sabedoria do Templo</span>
+        <h2 id="q-question">Pergunta</h2>
+        <div class="knowledge-box">
+          <strong id="q-pillar" style="color:var(--persia-gold)">Diretriz da Cartilha</strong>
+          <p id="q-text" style="margin-top:6px;"></p>
         </div>
-        <div id="quiz-options" class="options"></div>
-        <div id="quiz-feedback" class="feedback hidden"></div>
-        <button id="quiz-next" class="btn primary hidden" style="width:100%; margin-top:10px;">Continuar Aventura →</button>
+        <div class="quiz-options" id="q-options"></div>
+        <div id="q-feedback" class="feedback-banner hidden"></div>
+        <button class="btn primary hidden" id="btn-q-next" style="width:100%;">Continuar Jornada ▶</button>
       </div>
     </section>
 
-    <!-- TELA DE RESULTADOS E RANKING -->
+    <!-- TELA 5: RESULTADOS E HALL DA FAMA -->
     <section id="results" class="screen hidden">
-      <h2>Missão Concluída com Sucesso! 🌟</h2>
-      <p id="result-summary"></p>
-      
-      <div class="end-stats">
-        <div class="metric"><strong id="result-score">0</strong><span>PONTOS</span></div>
-        <div class="metric"><strong id="result-correct">0/12</strong><span>ACERTOS DE 1ª</span></div>
-        <div class="metric"><strong id="result-time">00:00</strong><span>TEMPO</span></div>
+      <span class="eyebrow">✦ Mestre das Areias • 30 Anos</span>
+      <h2>Templo Conquistado! 🏆</h2>
+      <p class="sub" id="res-summary"></p>
+
+      <div class="stats-row">
+        <div class="stat-card"><strong id="res-score">0</strong><span>SCORE FINAL</span></div>
+        <div class="stat-card"><strong id="res-first">0/12</strong><span>ACERTOS DE 1ª</span></div>
+        <div class="stat-card"><strong id="res-time">00:00</strong><span>TEMPO</span></div>
       </div>
 
-      <h3 style="color:var(--purple); margin:14px 0 6px; font-size:16px;">Hall da Comunidade (Ranking)</h3>
-      <div id="result-ranking"></div>
+      <h3 style="color:var(--persia-gold); font-size:15px; margin-top:8px;">Top 10 — Hall da Fama</h3>
+      <div id="res-ranking-box" style="width:100%; display:flex; justify-content:center;"></div>
 
-      <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-top:16px;">
-        <button class="btn primary" id="play-again">Jogar Novamente</button>
-        <button class="btn secondary" id="copy-score">📋 Copiar Score p/ WhatsApp</button>
-        <button class="btn secondary" id="result-home">Menu Principal</button>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px;">
+        <button class="btn primary" id="btn-play-again">Jogar Novamente</button>
+        <button class="btn secondary" id="btn-copy-score">📲 Copiar Score p/ WhatsApp</button>
+        <button class="btn secondary" id="btn-res-home">Menu Inicial</button>
       </div>
-      <p id="copy-status" style="margin-top:8px; font-size:12px; color:var(--muted);"></p>
+      <p id="copy-msg" style="font-size:12px; color:#4ade80; margin-top:8px; font-weight:700;"></p>
     </section>
 
-    <!-- TELA DE RANKING SEPARADA -->
+    <!-- TELA 6: RANKING SEPARADO -->
     <section id="ranking-screen" class="screen hidden">
-      <h2>Hall da Comunidade 🏆</h2>
-      <p>Placar de pontuações salvo neste navegador.</p>
-      <div id="ranking-content"></div>
-      <div style="display:flex; gap:8px; justify-content:center; margin-top:16px;">
-        <button class="btn secondary" id="ranking-back">Voltar ao Menu</button>
-        <button class="btn secondary" id="clear-ranking">Limpar Placar</button>
+      <span class="eyebrow">Placar Local</span>
+      <h2>Hall da Fama 🏆</h2>
+      <div id="standalone-ranking-box" style="width:100%; display:flex; justify-content:center;"></div>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:16px;">
+        <button class="btn secondary" id="btn-rank-back">Voltar</button>
+        <button class="btn secondary" id="btn-rank-clear">Limpar Placar</button>
       </div>
     </section>
   </main>
-
-  <footer class="footer">
-    Rede Comunitá • Jogo Educativo de Ação & RPG 30 Anos
-  </footer>
 </div>
 
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
 const screens = ['home', 'setup', 'play', 'quiz', 'results', 'ranking-screen'];
-function show(id) { screens.forEach(s => $(s).classList.toggle('hidden', s !== id)); }
+function showScreen(id) { screens.forEach(s => $(s).classList.toggle('hidden', s !== id)); }
 
-const heroes = [
-  { id: 'nina', name: 'Super Nina', role: 'Acolhimento', emoji: '🦸🏻‍♀️', color: '#ff6b22' },
-  { id: 'kauan', name: 'Super Kauan', role: 'Protagonismo', emoji: '🦸🏿‍♂️', color: '#7b4ba0' },
-  { id: 'bia', name: 'Super Bia', role: 'União', emoji: '🦸🏻‍♀️', color: '#e94d86' },
-  { id: 'leo', name: 'Super Léo', role: 'Equipe', emoji: '🦸🏽‍♂️', color: '#ff8a28' },
-  { id: 'clara', name: 'Super Clara', role: 'Sabedoria', emoji: '🦸🏻‍♀️', color: '#7843a0' },
-  { id: 'jorge', name: 'Super Jorge', role: 'Respeito', emoji: '🦸🏾‍♂️', color: '#f08a24' }
+// 6 Super-Heróis 30 Anos Rede Comunitá com traje Prince of Persia + 30 Anos
+const HEROES = [
+  { id: 'nina', name: 'Super Nina', role: 'Empatia & Acolhimento', skin: '#f1a676', hair: '#1d1424', sash: '#ff6b22', headband: '#54216b' },
+  { id: 'leo', name: 'Super Léo', role: 'União & Equipe', skin: '#e89d6b', hair: '#2b1911', sash: '#f5b932', headband: '#ff6b22' },
+  { id: 'kauan', name: 'Super Kauan', role: 'Protagonismo', skin: '#7a462a', hair: '#141018', sash: '#ff6b22', headband: '#f5b932' },
+  { id: 'bia', name: 'Super Bia', role: 'Inovação & Alegria', skin: '#f5be96', hair: '#18111c', sash: '#f06292', headband: '#54216b' },
+  { id: 'clara', name: 'Super Clara', role: 'Sabedoria & Ética', skin: '#f2cdb3', hair: '#d8dce3', sash: '#7b3f8c', headband: '#f5b932' },
+  { id: 'jorge', name: 'Super Jorge', role: 'Respeito Sênior', skin: '#875135', hair: '#c8ccd4', sash: '#f5b932', headband: '#54216b' }
 ];
 
-let hero = heroes[0], playerName = '', playerUnit = '', score = 0, hp = 100, mp = 50, xp = 0, levelRpg = 1, lives = 3;
-let levelIndex = 0, firstTry = 0, seconds = 0, clock = null, currentQuizIdx = 0, quizDone = false, quizAttempts = 0;
-
-const levels = [
-  { name: 'Cultura e Propósito', questions: [
-    { pillar: 'Somos um só time', knowledge: 'A cooperação permite somar habilidades e construir soluções coletivas.', q: 'Qual atitude fortalece o trabalho em equipe?', options: ['Competir isoladamente.', 'Compartilhar conhecimentos e ajudar.', 'Isolar setores.'], correct: 1 },
-    { pillar: 'Comunicação Empática', knowledge: 'Transparência e empatia combatem boatos e fofocas.', q: 'Ao ouvir um boato sobre um colega, o que fazer?', options: ['Repassar nos grupos.', 'Não espalhar e buscar diálogo.', 'Ignorar e isolar a equipe.'], correct: 1 },
-    { pillar: 'Atitude Responsável', knowledge: 'Zelar pelos recursos garante a sustentabilidade da nossa missão.', q: 'O que demonstra responsabilidade?', options: ['Cuidar dos espaços e recursos.', 'Desperdiçar materiais.', 'Ignorar normas.'], correct: 0 }
-  ]},
-  { name: 'Código de Conduta Ética', questions: [
-    { pillar: 'Uso de Bens', knowledge: 'Patrimônio físico e tecnológico destina-se ao trabalho profissional.', q: 'Sobre equipamentos da instituição:', options: ['Usar para fins particulares sem autorização.', 'Usar com prudência e zelar pelo patrimônio.', 'Retirar bens sem aviso.'], correct: 1 },
-    { pillar: 'Sigilo de Informações', knowledge: 'Dados de usuários e documentos internos são estritamente confidenciais.', q: 'Como lidar com dados de atendimento?', options: ['Postar em redes sociais.', 'Manter absoluto sigilo.', 'Comentar em locais públicos.'], correct: 1 },
-    { pillar: 'Conflito de Interesses', knowledge: 'Transparência evita favorecimentos e protege a credibilidade.', q: 'O que fazer diante de conflito de interesses?', options: ['Ocultar a situação.', 'Informar pelo canal apropriado.', 'Resolver por interesse próprio.'], correct: 1 }
-  ]},
-  { name: 'Inclusão de PcD', knowledge: 'Inclusão vai além de cotas: é autonomia e acessibilidade.', questions: [
-    { pillar: 'Terminologia Correta', knowledge: 'A ONU define a expressão oficial que valoriza o indivíduo.', q: 'Qual o termo correto?', options: ['Pessoa com Deficiência (PcD).', 'Portador de deficiência.', 'Pessoa especial.'], correct: 0 },
-    { pillar: 'Tecnologia Assistiva', knowledge: 'Recursos que promovem autonomia e independência.', q: 'Qual o objetivo da tecnologia assistiva?', options: ['Substituir o colaborador.', 'Promover autonomia e inclusão.', 'Isolar o funcionário.'], correct: 1 },
-    { pillar: 'Respeito ao Espaço', knowledge: 'Bengalas, muletas e cães-guia fazem parte do espaço corporal.', q: 'Sobre equipamentos de apoio:', options: ['Tocar sem permissão.', 'Respeitar o espaço pessoal.', 'Mudar de lugar.'], correct: 1 }
-  ]},
-  { name: 'Prevenção ao Assédio', knowledge: 'Ambiente seguro exige respeito, diálogo e canais de denúncia.', questions: [
-    { pillar: 'Assédio Moral', knowledge: 'Exige repetição e prolongamento de condutas humilhantes.', q: 'O que caracteriza assédio moral?', options: ['Cobrança justa de metas.', 'Exposição repetitiva a humilhações.', 'Feedback profissional.'], correct: 1 },
-    { pillar: 'Assédio Sexual', knowledge: 'Um único ato indesejado de natureza sexual basta para configurar.', q: 'Sobre assédio sexual no trabalho:', options: ['É permitido se for brincadeira.', 'Basta um único ato para configurar ilícito.', 'Exige anos de insistência.'], correct: 1 },
-    { pillar: 'Canais Oficiais', knowledge: 'Ouvidoria e Comissão de Ética acolhem denúncias com sigilo.', q: 'Onde relatar uma ocorrência?', options: ['Ouvidoria com sigilo garantido.', 'Espalhar boatos.', 'Guardar para si.'], correct: 0 }
-  ]}
+// 4 Fases Educativas baseadas nas Cartilhas da Rede Comunitá
+const STAGES = [
+  {
+    title: 'Cultura e Propósito',
+    subtitle: 'Muralhas da União e do Protagonismo',
+    tint: 'rgba(245, 185, 50, 0.05)',
+    questions: [
+      { pillar: 'Somos um só time', text: 'Na Rede Comunitá não há espaço para competição interna: somamos habilidades e o sucesso de um é o sucesso de todos.', q: 'Qual atitude fortalece nosso pilar "Somos um só time"?', opts: ['Competir internamente com os colegas.', 'Colaborar, discutir abertamente e pedir ajuda quando necessário.', 'Trabalhar isolado sem compartilhar práticas.'], ans: 1 },
+      { pillar: 'Comunicação com transparência e empatia', text: 'Falamos com o coração aberto, ouvimos atentamente e combatemos ativamente a fofoca.', q: 'Como manter um ambiente seguro e harmônico?', opts: ['Combater a fofoca e praticar feedback construtivo e respeitoso.', 'Espalhar boatos nos corredores.', 'Omitir informações da equipe.'], ans: 0 },
+      { pillar: 'Atitude responsável', text: 'Tomamos decisões baseadas em dados e fatos e temos zelo pelos recursos humanos e materiais.', q: 'O que define nossa Atitude Responsável?', opts: ['Fazer apenas o básico sem pensar no futuro.', 'Agir com integridade, cuidando dos espaços, do time e das famílias.', 'Decidir sem avaliar impactos.'], ans: 1 }
+    ]
+  },
+  {
+    title: 'Código de Conduta Ética',
+    subtitle: 'Câmaras da Integridade e Sigilo',
+    tint: 'rgba(138, 43, 226, 0.06)',
+    questions: [
+      { pillar: 'Conflito de Interesses e Patrimônio', text: 'Não contratamos parentes na mesma unidade e a retirada de bens a serviço exige autorização do superior.', q: 'Segundo o Código de Conduta Ética, sobre bens e parentesco:', opts: ['Bens podem ser levados para uso pessoal sem aviso.', 'É vedada contratação de parentes na mesma unidade e bens exigem zelo e autorização.', 'Parentes podem atuar juntos na mesma unidade.'], ans: 1 },
+      { pillar: 'Sigilo e Confidencialidade', text: 'Atendimentos, dados cadastrais de usuários, projetos e relatórios são estritamente confidenciais, mesmo após o desligamento.', q: 'Quais informações exigem sigilo absoluto?', opts: ['Dados de usuários, atendimentos e documentos internos, inclusive após sair da entidade.', 'Nenhuma informação é confidencial.', 'Apenas dados públicos.'], ans: 0 },
+      { pillar: 'Benefícios Pessoais e Presentes', text: 'É proibido aceitar dinheiro, viagens ou presentes de valor de fornecedores. Itens não recusáveis no ato devem ir ao Depto. Administrativo.', q: 'Se um fornecedor entregar um brinde caro na sua casa, o que fazer?', opts: ['Guardar em segredo.', 'Entregar obrigatoriamente ao Departamento Administrativo da Rede Comunitá.', 'Vender o presente.'], ans: 1 }
+    ]
+  },
+  {
+    title: 'Inclusão de PcD',
+    subtitle: 'Jardins Suspensos da Acessibilidade',
+    tint: 'rgba(46, 204, 113, 0.05)',
+    questions: [
+      { pillar: 'Lei de Cotas (Lei nº 8.213/91)', text: 'Empresas com 100 ou mais empregados devem preencher de 2% a 5% de seus cargos com PcDs, promovendo acessibilidade e desenvolvimento.', q: 'Para a Rede Comunitá, o que significa incluir de verdade?', opts: ['Apenas cumprir a cota isolando o profissional.', 'Oferecer tecnologia assistiva, acessibilidade e focar na capacidade da pessoa.', 'Tratar com infantilização.'], ans: 1 },
+      { pillar: 'Linguagem Apropriada (ONU)', text: 'A expressão correta enfatiza o indivíduo antes de sua condição e elimina termos pejorativos.', q: 'Qual é a expressão oficial definida pela Convenção da ONU?', opts: ['Portador de necessidades especiais.', 'Pessoa com Deficiência (PcD).', 'Pessoa inválida.'], ans: 1 },
+      { pillar: 'Respeito ao Espaço Corporal', text: 'Cadeira de rodas, muletas, bengalas e cães-guia são parte do espaço corporal da pessoa e só devem ser tocados com permissão.', q: 'Ao oferecer ajuda a uma Pessoa com Deficiência, como proceder?', opts: ['Tocar na cadeira de rodas sem perguntar.', 'Perguntar se precisa de ajuda, aguardar a resposta e respeitar suas instruções.', 'Decidir por ela sem ouvi-la.'], ans: 1 }
+    ]
+  },
+  {
+    title: 'Prevenção ao Assédio',
+    subtitle: 'Santuário do Respeito e Ouvidoria',
+    tint: 'rgba(230, 92, 25, 0.06)',
+    questions: [
+      { pillar: 'Assédio Moral vs. Exigência Profissional', text: 'Assédio moral exige repetição e prolongamento de condutas humilhantes. Cobranças normais de metas e ponto eletrônico não são assédio.', q: 'O que caracteriza o Assédio Moral no trabalho?', opts: ['O registro de frequência em ponto eletrônico.', 'Exposição repetitiva e prolongada a humilhações, gritos, isolamento ou boatos.', 'Avaliação justa de desempenho.'], ans: 1 },
+      { pillar: 'Assédio Sexual (Art. 216-A CP)', text: 'Diferente do assédio moral, no assédio sexual não é preciso repetição: um único ato indesejado de natureza sexual basta.', q: 'Sobre o Assédio Sexual no ambiente de trabalho:', opts: ['Basta a prática de um único ato que restrinja a liberdade sexual da vítima.', 'Precisa ocorrer dezenas de vezes para ser denunciado.', 'A culpa depende da vestimenta da vítima.'], ans: 0 },
+      { pillar: 'Canais Oficiais Sigilosos', text: 'Denúncias têm sigilo garantido pela Ouvidoria (ouvidoria@redecomunita.org.br), QR Code, Superior Hierárquico ou Comissão de Ética.', q: 'Qual o procedimento correto diante de assédio moral ou sexual?', opts: ['Anotar fatos/testemunhas, apoiar a vítima e acionar a Ouvidoria ou Comissão de Ética.', 'Silenciar por medo e nunca registrar.', 'Espalhar fofoca sem formalizar.'], ans: 0 }
+    ]
+  }
 ];
 
-const canvas = $('world'), ctx = canvas.getContext('2d');
-let player = { x: 50, y: 220, w: 32, h: 48, vx: 0, vy: 0, grounded: false, facing: 1, attackTimer: 0, magicTimer: 0 };
-let worldW = 2000, groundY = 320, keys = { left: false, right: false, jump: false, attack: false, magic: false };
-let platforms = [], candlesticks = [], enemies = [], floatingTexts = [];
+let selectedHero = HEROES[0];
+let playerName = '', playerUnit = '';
+let stageIdx = 0, score = 0, hp = 100, mp = 50, xp = 0, rpgLvl = 1, firstTryCount = 0, elapsedSec = 0, timerId = null;
+let quizAttempts = 0, quizCompleted = false;
 
-function buildLevel() {
-  player.x = 50; player.y = 200; player.vx = 0; player.vy = 0;
+const canvas = $('gameCanvas');
+const ctx = canvas.getContext('2d');
+const WORLD_W = 2480;
+const GROUND_Y = 468;
+const keys = { left: false, right: false, up: false, down: false, jump: false, action: false, magic: false };
+
+// GERAÇÃO PROCEDURAL DE TEXTURAS DE PEDRA FIÉIS À IMAGEM PRINCE OF PERSIA
+let sandstonePattern = null;
+function createSandstonePattern() {
+  const off = document.createElement('canvas');
+  off.width = 96;
+  off.height = 64;
+  const g = off.getContext('2d');
+
+  // Base arenito quente
+  g.fillStyle = '#c8ae86';
+  g.fillRect(0, 0, 96, 64);
+
+  const rows = [
+    { y: 0, h: 16, offsets: [0, 32, 68] },
+    { y: 16, h: 16, offsets: [14, 50, 82] },
+    { y: 32, h: 16, offsets: [0, 40, 72] },
+    { y: 48, h: 16, offsets: [18, 56, 88] }
+  ];
+
+  rows.forEach((r, ri) => {
+    for (let i = 0; i < r.offsets.length; i++) {
+      const x1 = r.offsets[i];
+      const x2 = r.offsets[i + 1] || 96;
+      const w = x2 - x1;
+      const shade = ((ri + i) % 3 === 0) ? '#bfa278' : (((ri + i) % 2 === 0) ? '#d2b993' : '#b5966c');
+      g.fillStyle = shade;
+      g.fillRect(x1 + 1, r.y + 1, w - 2, r.h - 2);
+      // Luz superior do tijolo
+      g.fillStyle = 'rgba(255, 245, 225, 0.35)';
+      g.fillRect(x1 + 1, r.y + 1, w - 2, 2);
+      // Sombra inferior e argamassa
+      g.fillStyle = '#7d6340';
+      g.fillRect(x1, r.y + r.h - 1, w, 1);
+      g.fillRect(x2 - 1, r.y, 1, r.h);
+    }
+  });
+  sandstonePattern = ctx.createPattern(off, 'repeat');
+}
+createSandstonePattern();
+
+// Estado do Jogador com suporte a Wall-Slide e Wall-Jump (como na foto!)
+let player = {
+  x: 60, y: 380, w: 30, h: 48, vx: 0, vy: 0,
+  grounded: false, wallSlide: 0, facing: 1,
+  actionTimer: 0, magicTimer: 0, invuln: 0,
+  starTimer: 0, mounted: false, jumpsLeft: 1, animTick: 0
+};
+
+let platforms = [], pillars = [], gates = [], levers = [], plates = [], pushBlocks = [];
+let fountains = [], slicers = [], spikes = [], poisonPools = [], torches = [], ivies = [];
+let grimoires = [], vases = [], powerups = [], enemies = [], projectiles = [], particles = [];
+let exitPortal = { x: 2350, y: GROUND_Y - 108, w: 62, h: 108, open: false };
+
+// Desenha o Herói no estilo Prince of Persia (Calça folgada branca, faixa, colete 30 anos e espada de luz)
+function drawPrinceHero(g, x, y, hData, facing, tick, wallSlide, mounted, starActive) {
+  g.save();
+  g.translate(Math.floor(x), Math.floor(y));
+  if (facing === -1) {
+    g.translate(30, 0);
+    g.scale(-1, 1);
+  }
+
+  const bob = player.grounded ? Math.sin(tick * 0.22) * 1.5 : 0;
+
+  if (starActive) {
+    g.fillStyle = `hsla(${(tick * 16) % 360}, 90%, 60%, 0.42)`;
+    g.beginPath();
+    g.arc(15, 24, 28, 0, Math.PI * 2);
+    g.fill();
+  }
+
+  // Cãopanheiro Real se montado
+  if (mounted) {
+    g.fillStyle = '#d99b52';
+    g.fillRect(0, 32, 30, 16);
+    g.fillRect(22, 22, 13, 13);
+    g.fillStyle = '#54216b';
+    g.fillRect(8, 30, 14, 5);
+    g.fillStyle = '#111';
+    g.fillRect(31, 25, 3, 3);
+  }
+
+  // Faixa/Capa esvoaçante persa
+  g.fillStyle = hData.sash;
+  g.beginPath();
+  g.moveTo(8, 22 + bob);
+  g.lineTo(-10 - Math.sin(tick * 0.25) * 5, 38);
+  g.lineTo(10, 36);
+  g.closePath();
+  g.fill();
+
+  // Calça branca folgada estilo Prince of Persia (como na imagem)
+  const stride = (!player.grounded || Math.abs(player.vx) > 0.5) ? Math.sin(tick * 0.35) * 4 : 0;
+  g.fillStyle = '#f5f2eb';
+  if (wallSlide !== 0) {
+    // Pose acrobática na parede igual à foto!
+    g.fillRect(6, 26, 18, 14);
+    g.fillStyle = '#4a2e1b';
+    g.fillRect(4, 38, 10, 7);
+  } else {
+    g.fillRect(6, 28, 9, 14 + stride * 0.5);
+    g.fillRect(15, 28, 9, 14 - stride * 0.5);
+    // Sombras da calça
+    g.fillStyle = '#d5cfc2';
+    g.fillRect(7, 34, 4, 7);
+    g.fillRect(17, 34, 4, 7);
+    // Botas de couro marrons
+    g.fillStyle = '#4a2e1b';
+    g.fillRect(5, 42 + stride * 0.5, 10, 6);
+    g.fillRect(15, 42 - stride * 0.5, 10, 6);
+  }
+
+  // Cinturão Persa Roxo e Dourado
+  g.fillStyle = '#54216b';
+  g.fillRect(6, 25 + bob, 18, 5);
+  g.fillStyle = '#f5b932';
+  g.fillRect(13, 24 + bob, 5, 6);
+
+  // Tronco / Colete 30 Anos Rede Comunitá
+  g.fillStyle = hData.skin;
+  g.fillRect(7, 13 + bob, 16, 13);
+  g.fillStyle = '#ffffff';
+  g.fillRect(8, 14 + bob, 14, 11);
+  // Emblema 30 Anos no peito
+  g.fillStyle = hData.sash;
+  g.fillRect(11, 16 + bob, 8, 6);
+
+  // Braços (com braceletes dourados)
+  g.fillStyle = hData.skin;
+  if (wallSlide !== 0) {
+    g.fillRect(18, 8, 10, 5); // Mão segurando a parede
+  } else {
+    g.fillRect(3, 15 + bob, 5, 10);
+    g.fillRect(22, 15 + bob, 5, 10);
+  }
+  g.fillStyle = '#f5b932';
+  g.fillRect(3, 21 + bob, 5, 3);
+  g.fillRect(22, 21 + bob, 5, 3);
+
+  // Cabeça e Cabelo
+  g.fillStyle = hData.skin;
+  g.fillRect(8, 2 + bob, 14, 12);
+  g.fillStyle = hData.hair;
+  g.fillRect(6, 0 + bob, 17, 6);
+  g.fillRect(6, 3 + bob, 4, 8);
+  // Faixa de cabeça (Headband)
+  g.fillStyle = hData.headband;
+  g.fillRect(7, 4 + bob, 16, 3);
+
+  // Olhos
+  g.fillStyle = '#14161a';
+  g.fillRect(12, 8 + bob, 2, 3);
+  g.fillRect(18, 8 + bob, 2, 3);
+
+  g.restore();
+}
+
+function buildStage() {
+  player.x = 55; player.y = 370; player.vx = 0; player.vy = 0;
+  player.wallSlide = 0; player.starTimer = 0;
+  exitPortal.open = false;
+
+  // Plataformas e Lajes em Pedra Azul-Ardósia (Estilo imagem Prince of Persia)
   platforms = [
-    { x: 300, y: 250, w: 180, h: 16 },
-    { x: 580, y: 200, w: 160, h: 16 },
-    { x: 840, y: 240, w: 200, h: 16 },
-    { x: 1140, y: 190, w: 180, h: 16 },
-    { x: 1450, y: 230, w: 220, h: 16 }
+    // Área 1: Pátio da Fonte e Chaminé de Wall-Jump (igual à imagem!)
+    { x: 190, y: 340, w: 190, h: 26 },
+    { x: 350, y: 170, w: 230, h: 28 }, // Topo da chaminé onde fica o 1º Grimório!
+
+    // Área 2: Salão do Bloco Empurrável e Placa de Pressão
+    { x: 680, y: 340, w: 310, h: 26 },
+    { x: 760, y: 215, w: 210, h: 26 },
+
+    // Área 3: Galeria das Lâminas Cortantes e Alavanca Alta
+    { x: 1140, y: 340, w: 250, h: 26 },
+    { x: 1220, y: 210, w: 240, h: 26 },
+    { x: 1510, y: 310, w: 210, h: 26 },
+
+    // Área 4: Torre Final do Santuário
+    { x: 1840, y: 350, w: 250, h: 26 },
+    { x: 1920, y: 220, w: 260, h: 26 }
   ];
-  candlesticks = [
-    { x: 380, y: 210, w: 16, h: 32, broken: false, type: 'hp' },
-    { x: 660, y: 160, w: 16, h: 32, broken: false, type: 'mp' },
-    { x: 940, y: 200, w: 16, h: 32, broken: false, type: 'quiz', qIdx: 0 },
-    { x: 1220, y: 150, w: 16, h: 32, broken: false, type: 'quiz', qIdx: 1 },
-    { x: 1560, y: 190, w: 16, h: 32, broken: false, type: 'quiz', qIdx: 2 }
+
+  // Colunas Verticais de Pedra Azul-Ardósia (Permitem Wall-Jump como na imagem!)
+  pillars = [
+    // Chaminé de Wall Jump da Área 1 (Salte de uma parede à outra para subir!)
+    { x: 190, y: 120, w: 38, h: 220, climbable: true },
+    { x: 350, y: 170, w: 38, h: 170, climbable: true },
+
+    // Coluna do Portão 1
+    { x: 560, y: 170, w: 36, h: 170, climbable: true },
+
+    // Coluna do Portão 2
+    { x: 1050, y: 160, w: 36, h: 180, climbable: true },
+
+    // Coluna do Portão 3
+    { x: 1740, y: 160, w: 36, h: 180, climbable: true }
   ];
+
+  // 3 Portões de Grade Pesada que trancam o caminho (abrem com Alavanca ou Placa de Pressão)
+  gates = [
+    { id: 0, x: 564, y: 340, w: 28, h: 128, open: false, openProgress: 0 },
+    { id: 1, x: 1054, y: 340, w: 28, h: 128, open: false, openProgress: 0 },
+    { id: 2, x: 1744, y: 340, w: 28, h: 128, open: false, openProgress: 0 }
+  ];
+
+  // Alavancas de Parede (Aperte B ou encoste para puxar)
+  levers = [
+    { x: 490, y: 140, active: false, gateId: 0, hint: 'Alavanca do 1º Portão' },
+    { x: 1620, y: 280, active: false, gateId: 2, hint: 'Alavanca do 3º Portão' }
+  ];
+
+  // Puzzle de Bloco Empurrável + Placa de Pressão no Chão (Abre o Portão 2!)
+  pushBlocks = [
+    { x: 730, y: 300, w: 40, h: 40, vx: 0 }
+  ];
+  plates = [
+    { x: 910, y: 334, w: 52, h: 8, pressed: false, gateId: 1 }
+  ];
+
+  // Fontes de Água em Arco na Parede (Igual à foto de referência!)
+  fountains = [
+    { x: 270, y: GROUND_Y - 82, w: 56, h: 82 },
+    { x: 1280, y: GROUND_Y - 82, w: 56, h: 82 }
+  ];
+
+  // Tochas Acesas na Parede de Arenito
+  torches = [
+    { x: 130, y: 360 }, { x: 455, y: 380 }, { x: 460, y: 115 },
+    { x: 830, y: 280 }, { x: 1180, y: 280 }, { x: 1580, y: 380 },
+    { x: 1980, y: 290 }, { x: 2280, y: 370 }
+  ];
+
+  // Heras e Trepadeiras Verdes nas Bordas de Pedra (Igual à foto!)
+  ivies = [
+    { x: 186, y: 336, w: 70, h: 55 },
+    { x: 348, y: 168, w: 65, h: 60 },
+    { x: 346, y: 336, w: 55, h: 50 },
+    { x: 680, y: 336, w: 75, h: 48 },
+    { x: 1140, y: 336, w: 68, h: 52 },
+    { x: 1840, y: 346, w: 72, h: 50 }
+  ];
+
+  // Armadilhas Clássicas Prince of Persia: Lâminas Cortantes (Slicers) e Espinhos
+  slicers = [
+    { x: 870, y: 155, h: 60, phase: 0 },
+    { x: 1340, y: 150, h: 60, phase: 1.5 },
+    { x: 2040, y: 160, h: 60, phase: 0.8 }
+  ];
+
+  spikes = [
+    { x: 640, y: GROUND_Y - 14, w: 90, h: 14 },
+    { x: 1420, y: GROUND_Y - 14, w: 95, h: 14 }
+  ];
+
+  // Poças de Veneno da Fofoca
+  poisonPools = [
+    { x: 940, y: GROUND_Y - 10, w: 95 },
+    { x: 1620, y: GROUND_Y - 10, w: 100 }
+  ];
+
+  // Vasos Persas que soltam Cãopanheiro, Estrela da Super Empatia e Areias do Tempo
+  vases = [
+    { x: 245, y: 312, broken: false, drop: 'dog' },
+    { x: 820, y: 187, broken: false, drop: 'star' },
+    { x: 1270, y: 182, broken: false, drop: 'sand' },
+    { x: 1960, y: 322, broken: false, drop: 'hp' }
+  ];
+
+  // 3 Grimórios do Saber (?) por Fase
+  grimoires = [
+    { x: 430, y: 120, got: false, qIdx: 0 },
+    { x: 900, y: 165, got: false, qIdx: 1 },
+    { x: 2110, y: 170, got: false, qIdx: 2 }
+  ];
+
+  // Guardas Sombrios (Comportamentos Antiéticos)
+  const enemyNames = ['Fofoca', 'Conflito', 'Capacitismo', 'Assédio'];
   enemies = [
-    { x: 450, y: groundY - 36, w: 32, h: 36, vx: 1.2, hp: 40, type: 'Fofoca' },
-    { x: 800, y: groundY - 36, w: 32, h: 36, vx: -1.5, hp: 50, type: 'Individualismo' },
-    { x: 1300, y: groundY - 36, w: 32, h: 36, vx: 1.5, hp: 60, type: 'Capacitismo' }
+    { x: 800, minX: 700, maxX: 960, y: GROUND_Y - 46, w: 32, h: 46, vx: 1.5, hp: 50, maxHp: 50, name: enemyNames[stageIdx] },
+    { x: 1260, minX: 1150, maxX: 1370, y: 294, w: 32, h: 46, vx: -1.6, hp: 60, maxHp: 60, name: 'Intolerância' },
+    { x: 1960, minX: 1850, maxX: 2070, y: GROUND_Y - 46, w: 34, h: 46, vx: 1.7, hp: 75, maxHp: 75, name: 'Omissão' }
   ];
-  floatingTexts = [];
+
+  powerups = [];
+  projectiles = [];
+  particles = [];
+  updateHUD();
 }
 
-function updateHUD() {
-  $('hud-hero').textContent = hero.name.replace('Super ', '');
-  $('hud-level').textContent = `${levelIndex + 1}/4`;
-  $('hud-level-rpg').textContent = levelRpg;
-  $('hud-xp').textContent = `${xp}/${levelRpg * 100}`;
-  $('hud-hp').textContent = hp;
-  $('hud-mp').textContent = mp;
-  $('hud-score').textContent = score;
+function addFloatText(txt, x, y, color = '#f5b932') {
+  particles.push({ txt, x, y, vy: -1.1, life: 45, color });
 }
 
-function addFloatingText(text, x, y, color = '#ffc928') {
-  floatingTexts.push({ text, x, y, life: 40, color });
+function gainXP(amount) {
+  xp += amount;
+  if (xp >= rpgLvl * 100) {
+    xp -= rpgLvl * 100;
+    rpgLvl++;
+    hp = 100;
+    mp = 50;
+    addFloatText('LEVEL UP! NV ' + rpgLvl, player.x, player.y - 20, '#4ade80');
+  }
 }
 
-function updateGame() {
-  // Movimento horizontal
-  if (keys.left) { player.vx = -4.2; player.facing = -1; }
-  else if (keys.right) { player.vx = 4.2; player.facing = 1; }
-  else { player.vx *= 0.75; }
+function updatePhysics() {
+  player.animTick++;
+  if (player.invuln > 0) player.invuln--;
+  if (player.starTimer > 0) player.starTimer--;
 
-  // Pulo
-  if (keys.jump && player.grounded) {
-    player.vy = -11.5;
-    player.grounded = false;
-    keys.jump = false;
+  // Movimento Horizontal
+  const spd = player.starTimer > 0 ? 5.3 : (player.mounted ? 4.7 : 4.1);
+  if (keys.left) { player.vx = -spd; player.facing = -1; }
+  else if (keys.right) { player.vx = spd; player.facing = 1; }
+  else { player.vx *= 0.76; }
+
+  // Gravidade (Mais suave durante Wall-Slide na parede!)
+  if (player.wallSlide !== 0 && player.vy > 0) {
+    player.vy = Math.min(player.vy + 0.18, 1.8);
+  } else {
+    player.vy += 0.56;
   }
 
-  // Gravidade
-  player.vy += 0.55;
+  // Pulo Normal, Pulo Duplo ou WALL-JUMP Acrobático!
+  if (keys.jump) {
+    if (player.grounded) {
+      player.vy = player.mounted ? -12.5 : -11.6;
+      player.grounded = false;
+      player.jumpsLeft = player.mounted ? 1 : 0;
+      keys.jump = false;
+    } else if (player.wallSlide !== 0) {
+      // Wall Jump estilo Prince of Persia! Impulsiona para o lado oposto e para cima
+      player.vy = -11.5;
+      player.vx = -player.wallSlide * 6.5;
+      player.facing = -player.wallSlide;
+      player.wallSlide = 0;
+      addFloatText('🧗 WALL JUMP!', player.x, player.y, '#7fd4ff');
+      keys.jump = false;
+    } else if (player.jumpsLeft > 0) {
+      player.vy = -11.2;
+      player.jumpsLeft--;
+      keys.jump = false;
+    }
+  }
+
+  // Move X e checa colisão horizontal com Colunas e Portões Fechados
   player.x += player.vx;
-  player.y += player.vy;
+  player.x = Math.max(12, Math.min(WORLD_W - 44, player.x));
+  player.wallSlide = 0;
 
-  // Limites do mundo
-  player.x = Math.max(10, Math.min(worldW - 50, player.x));
-  player.grounded = false;
-
-  // Chão
-  if (player.y + player.h >= groundY) {
-    player.y = groundY - player.h;
-    player.vy = 0;
-    player.grounded = true;
-  }
-
-  // Plataformas
-  platforms.forEach(p => {
-    if (player.x + player.w > p.x && player.x < p.x + p.w &&
-        player.y + player.h >= p.y && player.y + player.h <= p.y + p.vy + 8 && player.vy >= 0) {
-      player.y = p.y - player.h;
-      player.vy = 0;
-      player.grounded = true;
+  // Empurrar Blocos de Pedra (Puzzle)
+  pushBlocks.forEach(b => {
+    if (rectOverlap(player, b)) {
+      if (player.vx > 0 && player.x < b.x) {
+        b.x = Math.min(955, b.x + 2.4);
+        player.x = b.x - player.w;
+      } else if (player.vx < 0 && player.x > b.x) {
+        b.x = Math.max(690, b.x - 2.4);
+        player.x = b.x + b.w;
+      }
     }
   });
 
-  // Ataque (Chicote de Luz)
-  if (keys.attack && player.attackTimer === 0) {
-    player.attackTimer = 18;
-    keys.attack = false;
-    const hitBox = { x: player.facing === 1 ? player.x + player.w : player.x - 45, y: player.y + 10, w: 45, h: 30 };
-    
-    // Quebrar castiçais
-    candlesticks.forEach(c => {
-      if (!c.broken && hitBox.x < c.x + c.w && hitBox.x + hitBox.w > c.x && hitBox.y < c.y + c.h && hitBox.y + hitBox.h > c.y) {
-        c.broken = true;
-        score += 25;
-        if (c.type === 'hp') { hp = Math.min(100, hp + 25); addFloatingText('+25 HP', c.x, c.y, '#39a574'); }
-        else if (c.type === 'mp') { mp = Math.min(100, mp + 25); addFloatingText('+25 MP', c.x, c.y, '#613a82'); }
-        else if (c.type === 'quiz') { openQuiz(c.qIdx); }
+  // Colisão Horizontal com Pilares (Ativa Wall-Slide se estiver no ar!)
+  pillars.forEach(pil => {
+    if (rectOverlap(player, pil)) {
+      if (player.vx > 0 && player.x + player.w - player.vx <= pil.x + 8) {
+        player.x = pil.x - player.w;
+        if (!player.grounded && pil.climbable) player.wallSlide = 1;
+      } else if (player.vx < 0 && player.x - player.vx >= pil.x + pil.w - 8) {
+        player.x = pil.x + pil.w;
+        if (!player.grounded && pil.climbable) player.wallSlide = -1;
+      }
+    }
+  });
+
+  // Colisão Horizontal com Portões Fechados
+  gates.forEach(gt => {
+    if (!gt.open && rectOverlap(player, gt)) {
+      if (player.vx > 0) player.x = gt.x - player.w;
+      else if (player.vx < 0) player.x = gt.x + gt.w;
+    }
+  });
+
+  // Move Y e checa Chão, Plataformas, Topo de Pilares e Topo de Blocos
+  player.y += player.vy;
+  player.grounded = false;
+
+  if (player.y + player.h >= GROUND_Y) {
+    player.y = GROUND_Y - player.h;
+    player.vy = 0;
+    player.grounded = true;
+    player.jumpsLeft = player.mounted ? 2 : 1;
+  }
+
+  [...platforms, ...pillars, ...pushBlocks].forEach(plat => {
+    if (
+      player.x + player.w > plat.x + 4 &&
+      player.x < plat.x + plat.w - 4 &&
+      player.y + player.h >= plat.y &&
+      player.y + player.h <= plat.y + Math.max(16, player.vy + 10) &&
+      player.vy >= 0
+    ) {
+      player.y = plat.y - player.h;
+      player.vy = 0;
+      player.grounded = true;
+      player.jumpsLeft = player.mounted ? 2 : 1;
+    }
+  });
+
+  // Verificar Placas de Pressão (Pelo Bloco de Pedra ou pelo Jogador)
+  plates.forEach(pl => {
+    const onPlate = pushBlocks.some(b => rectOverlap(b, { x: pl.x, y: pl.y - 10, w: pl.w, h: 20 })) ||
+                    rectOverlap(player, { x: pl.x, y: pl.y - 10, w: pl.w, h: 20 });
+    if (onPlate && !pl.pressed) {
+      pl.pressed = true;
+      const g = gates.find(gt => gt.id === pl.gateId);
+      if (g && !g.open) {
+        g.open = true;
+        score += 60;
+        addFloatText('⚙️ PLACA ATIVADA! PORTÃO ABERTO!', pl.x, pl.y - 25, '#4ade80');
+        updateHUD();
+      }
+    }
+  });
+
+  // Animação dos Portões subindo
+  gates.forEach(gt => {
+    if (gt.open && gt.openProgress < gt.h - 18) {
+      gt.openProgress += 3;
+    }
+  });
+
+  // Botão B (Atacar com Cimitarra/Chicote de Luz, Puxar Alavancas, Quebrar Vasos e Beber na Fonte)
+  if (keys.action && player.actionTimer === 0) {
+    player.actionTimer = 16;
+    keys.action = false;
+
+    const hitX = player.facing === 1 ? player.x + player.w : player.x - 54;
+    const swordBox = { x: hitX, y: player.y + 6, w: 54, h: 36 };
+
+    // Puxar Alavancas
+    levers.forEach(lev => {
+      if (!lev.active && Math.hypot((player.x + 15) - lev.x, (player.y + 24) - lev.y) < 52) {
+        lev.active = true;
+        const g = gates.find(gt => gt.id === lev.gateId);
+        if (g) g.open = true;
+        score += 50;
+        addFloatText('🏛️ ALAVANCA ACIONADA!', lev.x, lev.y - 20, '#4ade80');
         updateHUD();
       }
     });
 
-    // Acertar inimigos
+    // Beber nas Fontes de Água em Arco
+    fountains.forEach(f => {
+      if (rectOverlap(player, f)) {
+        hp = Math.min(100, hp + 35);
+        mp = Math.min(50, mp + 20);
+        addFloatText('⛲ ÁGUA DA VIDA (+35 HP)', f.x + 28, f.y, '#7fd4ff');
+        updateHUD();
+      }
+    });
+
+    // Quebrar Vasos Persas
+    vases.forEach(v => {
+      if (!v.broken && rectOverlap(swordBox, { x: v.x - 12, y: v.y - 10, w: 28, h: 32 })) {
+        v.broken = true;
+        score += 25;
+        powerups.push({ x: v.x, y: v.y - 8, type: v.drop });
+        addFloatText('🏺 +TESOURO!', v.x, v.y - 12, '#f5b932');
+        updateHUD();
+      }
+    });
+
+    // Golpear Inimigos
     enemies.forEach(e => {
-      if (e.hp > 0 && hitBox.x < e.x + e.w && hitBox.x + hitBox.w > e.x && hitBox.y < e.y + e.h && hitBox.y + hitBox.h > e.y) {
-        e.hp -= 25;
-        addFloatingText('-25', e.x, e.y, '#ff6b22');
+      if (e.hp > 0 && rectOverlap(swordBox, e)) {
+        const dmg = 28 + rpgLvl * 5;
+        e.hp -= dmg;
+        addFloatText('-' + dmg, e.x, e.y, '#ff6b22');
         if (e.hp <= 0) {
-          score += 50;
-          xp += 40;
-          if (xp >= levelRpg * 100) { levelRpg++; xp = 0; hp = 100; addFloatingText('LEVEL UP!', player.x, player.y - 20, '#ffc928'); }
-          updateHUD();
+          score += 80;
+          gainXP(45);
+          addFloatText('+80 PTS', e.x, e.y - 14, '#4ade80');
         }
+        updateHUD();
       }
     });
   }
-  if (player.attackTimer > 0) player.attackTimer--;
+  if (player.actionTimer > 0) player.actionTimer--;
 
-  // Magia / Cruz de Luz
+  // Também ativa alavancas automaticamente ao encostar nelas para facilitar no celular
+  levers.forEach(lev => {
+    if (!lev.active && Math.hypot((player.x + 15) - lev.x, (player.y + 24) - lev.y) < 28) {
+      lev.active = true;
+      const g = gates.find(gt => gt.id === lev.gateId);
+      if (g) g.open = true;
+      score += 50;
+      addFloatText('🏛️ PORTÃO ABERTO!', lev.x, lev.y - 20, '#4ade80');
+      updateHUD();
+    }
+  });
+
+  // Botão X: Magia das Areias da Empatia
   if (keys.magic && player.magicTimer === 0 && mp >= 15) {
     mp -= 15;
-    player.magicTimer = 35;
+    player.magicTimer = 24;
     keys.magic = false;
-    enemies.forEach(e => {
-      if (e.hp > 0) {
-        e.hp -= 45;
-        addFloatingText('-45 MAGIA', e.x, e.y, '#ffc928');
-        if (e.hp <= 0) { score += 60; xp += 50; updateHUD(); }
-      }
-    });
+    projectiles.push({ x: player.x + 15, y: player.y + 18, vx: player.facing * 8.5, ticks: 0 });
     updateHUD();
   }
   if (player.magicTimer > 0) player.magicTimer--;
 
-  // Inimigos movimentação e dano
+  projectiles.forEach(p => {
+    p.ticks++;
+    if (p.ticks === 26) p.vx *= -1;
+    p.x += p.vx;
+    enemies.forEach(e => {
+      if (e.hp > 0 && rectOverlap({ x: p.x - 12, y: p.y - 12, w: 24, h: 24 }, e)) {
+        e.hp -= 10;
+        addFloatText('-10✨', e.x, e.y, '#7fd4ff');
+        if (e.hp <= 0) { score += 80; gainXP(45); updateHUD(); }
+      }
+    });
+  });
+  projectiles = projectiles.filter(p => p.ticks < 52);
+
+  // Coletar Powerups (Cãopanheiro, Estrela Super Empatia, Areia Dourada, Vida)
+  powerups.forEach(p => {
+    if (rectOverlap(player, { x: p.x - 12, y: p.y - 12, w: 28, h: 28 })) {
+      p.collected = true;
+      if (p.type === 'dog') {
+        player.mounted = true;
+        addFloatText('🐾 CÃOPANHEIRO! (Pulo Duplo + Imune a Veneno)', player.x, player.y - 16, '#f5b932');
+      } else if (p.type === 'star') {
+        player.starTimer = 340;
+        addFloatText('⭐ SUPER EMPATIA ATIVADA!', player.x, player.y - 16, '#7fd4ff');
+      } else if (p.type === 'sand') {
+        mp = 50; score += 50;
+        addFloatText('⏳ +AREIAS DO SABER!', player.x, player.y - 16, '#f5b932');
+      } else {
+        hp = 100;
+        addFloatText('❤️ +100% VIDA!', player.x, player.y - 16, '#4ade80');
+      }
+      updateHUD();
+    }
+  });
+  powerups = powerups.filter(p => !p.collected);
+
+  // Tocar nos Grimórios (?) -> Abre Quiz Educativo
+  grimoires.forEach(g => {
+    if (!g.got && rectOverlap(player, { x: g.x, y: g.y, w: 34, h: 34 })) {
+      g.got = true;
+      openQuizModal(g.qIdx);
+    }
+  });
+
+  // Armadilhas de Lâminas Cortantes (Slicers)
+  slicers.forEach(sl => {
+    const ext = Math.abs(Math.sin(player.animTick * 0.05 + sl.phase));
+    sl.currH = ext * sl.h;
+    if (ext > 0.45 && rectOverlap(player, { x: sl.x - 10, y: sl.y, w: 20, h: sl.currH })) {
+      damagePlayer(20);
+    }
+  });
+
+  // Espinhos e Veneno
+  spikes.forEach(sp => {
+    if (rectOverlap(player, sp)) damagePlayer(18);
+  });
+  poisonPools.forEach(po => {
+    if (rectOverlap(player, { x: po.x, y: po.y, w: po.w, h: 12 }) && !player.mounted) {
+      damagePlayer(12);
+    }
+  });
+
+  // Movimentar Inimigos
   enemies.forEach(e => {
     if (e.hp <= 0) return;
     e.x += e.vx;
-    if (e.x < 100 || e.x > worldW - 100) e.vx *= -1;
-
-    // Colisão com jogador
-    if (player.x + player.w > e.x && player.x < e.x + e.w && player.y + player.h > e.y && player.y < e.y + e.h) {
-      hp -= 1;
-      updateHUD();
-      if (hp <= 0) {
-        hp = 100;
-        player.x = 50; player.y = 200;
-        addFloatingText('Respawn!', player.x, player.y, '#b42318');
+    if (e.x < e.minX || e.x > e.maxX) e.vx *= -1;
+    if (rectOverlap(player, e)) {
+      if (player.starTimer > 0) {
+        e.hp = 0; score += 80; addFloatText('CONVERTIDO!', e.x, e.y, '#7fd4ff'); updateHUD();
+      } else {
+        damagePlayer(15);
       }
     }
   });
 
-  // Fim de fase ao chegar no fim do mundo
-  if (player.x >= worldW - 80) {
-    if (levelIndex < levels.length - 1) {
-      levelIndex++;
-      buildLevel();
-      updateHUD();
+  // Destravar Portal Final quando os 3 Grimórios forem respondidos
+  if (grimoires.every(g => g.got)) {
+    exitPortal.open = true;
+  }
+
+  if (rectOverlap(player, exitPortal)) {
+    if (exitPortal.open) {
+      if (stageIdx < STAGES.length - 1) {
+        stageIdx++;
+        buildStage();
+      } else {
+        finishAdventure();
+      }
     } else {
-      finishGame();
+      addFloatText('Responda os 3 Grimórios (?) para abrir!', exitPortal.x - 40, exitPortal.y, '#f5b932');
     }
   }
 
-  // Partículas flutuantes
-  floatingTexts.forEach(ft => { ft.y -= 0.6; ft.life--; });
-  floatingTexts = floatingTexts.filter(ft => ft.life > 0);
+  particles.forEach(pt => { pt.y += pt.vy; pt.life--; });
+  particles = particles.filter(pt => pt.life > 0);
 }
 
-function drawGame() {
-  const w = canvas.width, h = canvas.height;
-  const cam = Math.max(0, Math.min(worldW - w, player.x - w * 0.35));
+function damagePlayer(dmg) {
+  if (player.invuln > 0 || player.starTimer > 0) return;
+  player.invuln = 50;
+  player.vy = -5.5;
+  if (player.mounted) {
+    player.mounted = false;
+    addFloatText('O Cãopanheiro absorveu o dano!', player.x, player.y, '#f5b932');
+    return;
+  }
+  hp = Math.max(0, hp - dmg);
+  addFloatText('-' + dmg + ' HP', player.x, player.y, '#f87171');
+  if (hp <= 0) {
+    hp = 100;
+    score = Math.max(0, score - 50);
+    player.x = 55; player.y = 370;
+    addFloatText('Renascendo no Início da Sala...', player.x, player.y, '#fff');
+  }
+  updateHUD();
+}
 
-  // Céu / Fundo Pixel Art
-  ctx.fillStyle = '#7ec0ee';
-  ctx.fillRect(0, 0, w, h);
-  ctx.fillStyle = '#ffffff60';
-  ctx.fillRect(100 - cam * 0.2, 50, 120, 40);
-  ctx.fillRect(600 - cam * 0.2, 80, 160, 50);
-  ctx.fillRect(1300 - cam * 0.2, 40, 140, 45);
+function rectOverlap(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+// RENDERIZAÇÃO FIEL À IMAGEM PRINCE OF PERSIA (Arenito + Pedra Azul-Ardósia + Heras + Fontes + Medallion)
+function renderScene() {
+  const st = STAGES[stageIdx];
+  const camX = Math.max(0, Math.min(WORLD_W - canvas.width, player.x - canvas.width * 0.36));
 
   ctx.save();
-  ctx.translate(-cam, 0);
+  ctx.translate(-Math.floor(camX), 0);
 
-  // Chão
-  ctx.fillStyle = '#3a5f0b';
-  ctx.fillRect(0, groundY, worldW, h - groundY);
-  ctx.fillStyle = '#5c3a21';
-  ctx.fillRect(0, groundY + 14, worldW, h - groundY - 14);
+  // 1. Parede de Fundo em Blocos de Arenito (Sandstone) idêntica à foto
+  if (sandstonePattern) {
+    ctx.fillStyle = sandstonePattern;
+    ctx.fillRect(0, 0, WORLD_W, GROUND_Y);
+  } else {
+    ctx.fillStyle = '#c8ae86';
+    ctx.fillRect(0, 0, WORLD_W, GROUND_Y);
+  }
 
-  // Plataformas flutuantes (estilo imagem de referência)
-  platforms.forEach(p => {
-    ctx.fillStyle = '#5c3a21';
-    ctx.fillRect(p.x, p.y, p.w, p.h);
-    ctx.fillStyle = '#3a5f0b';
-    ctx.fillRect(p.x, p.y, p.w, 6);
+  // Sombreado atmosférico do templo
+  const shadeGrad = ctx.createLinearGradient(0, 0, 0, GROUND_Y);
+  shadeGrad.addColorStop(0, 'rgba(15, 23, 34, 0.48)');
+  shadeGrad.addColorStop(0.5, st.tint);
+  shadeGrad.addColorStop(1, 'rgba(20, 15, 10, 0.38)');
+  ctx.fillStyle = shadeGrad;
+  ctx.fillRect(0, 0, WORLD_W, GROUND_Y);
+
+  // Detalhes Arquitetônicos de Fundo (Nichos com caveira/relíquia e rachaduras como no topo da imagem)
+  [280, 980, 1680].forEach(nx => {
+    ctx.fillStyle = '#523e29';
+    ctx.fillRect(nx, 32, 46, 32);
+    ctx.strokeStyle = '#382919';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(nx, 32, 46, 32);
+    // Pequeno vaso/cálice antigo dentro do nicho
+    ctx.fillStyle = '#d4a24c';
+    ctx.fillRect(nx + 12, 46, 10, 16);
+    ctx.fillStyle = '#e8dfd1';
+    ctx.beginPath();
+    ctx.arc(nx + 33, 54, 7, 0, Math.PI * 2);
+    ctx.fill();
   });
 
-  // Castiçais
-  candlesticks.forEach(c => {
-    if (!c.broken) {
-      ctx.fillStyle = hero.color;
-      ctx.fillRect(c.x, c.y, c.w, c.h);
-      ctx.fillStyle = '#ffc928';
-      ctx.fillRect(c.x + 4, c.y - 8, 8, 10);
+  // 2. Fontes de Água em Arco Esculpido (Idênticas à parte inferior da imagem!)
+  fountains.forEach(f => {
+    // Arco escuro esculpido na parede
+    ctx.fillStyle = '#4a3a28';
+    ctx.beginPath();
+    ctx.arc(f.x + f.w / 2, f.y + 28, 28, Math.PI, 0);
+    ctx.lineTo(f.x + f.w, f.y + f.h);
+    ctx.lineTo(f.x, f.y + f.h);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#8c7252';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    // Bacia de pedra da fonte
+    ctx.fillStyle = '#b5966c';
+    ctx.beginPath();
+    ctx.ellipse(f.x + f.w / 2, f.y + 52, 22, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#7d6340';
+    ctx.fillRect(f.x + f.w / 2 - 8, f.y + 56, 16, 24);
+
+    // Fio de água cristalina jorrando e superfície de água azul
+    ctx.fillStyle = '#80dcff';
+    ctx.fillRect(f.x + f.w / 2 - 2, f.y + 24, 4, 26);
+    ctx.beginPath();
+    ctx.ellipse(f.x + f.w / 2, f.y + 50, 17, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // 3. Tochas Acesas na Parede com Halo de Luz Quente
+  torches.forEach((t, i) => {
+    const flicker = Math.sin(player.animTick * 0.25 + i) * 6;
+    const rad = ctx.createRadialGradient(t.x, t.y - 12, 4, t.x, t.y - 12, 75 + flicker);
+    rad.addColorStop(0, 'rgba(255, 190, 60, 0.55)');
+    rad.addColorStop(0.5, 'rgba(230, 92, 25, 0.22)');
+    rad.addColorStop(1, 'rgba(230, 92, 25, 0)');
+    ctx.fillStyle = rad;
+    ctx.beginPath();
+    ctx.arc(t.x, t.y - 12, 75 + flicker, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Suporte dourado/bronze na parede
+    ctx.fillStyle = '#8c6224';
+    ctx.fillRect(t.x - 4, t.y, 8, 22);
+    ctx.fillStyle = '#c9933b';
+    ctx.fillRect(t.x - 6, t.y - 2, 12, 5);
+
+    // Chama animada
+    ctx.fillStyle = '#ff6b1a';
+    ctx.beginPath();
+    ctx.arc(t.x, t.y - 10, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ffeb66';
+    ctx.beginPath();
+    ctx.arc(t.x, t.y - 12, 4, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // 4. Chão Principal e Colunas/Plataformas em Pedra Azul-Ardósia (Slate-Blue Stone da imagem!)
+  drawSlateBlockStructure(0, GROUND_Y, WORLD_W, canvas.height - GROUND_Y, true);
+  platforms.forEach(p => drawSlateBlockStructure(p.x, p.y, p.w, p.h, true));
+  pillars.forEach(pil => drawSlateBlockStructure(pil.x, pil.y, pil.w, pil.h, false));
+
+  // 5. Heras e Trepadeiras Verdes penduradas nas pedras azuis (Igual à foto!)
+  ivies.forEach(iv => drawLushIvy(iv.x, iv.y, iv.w, iv.h));
+
+  // 6. Portões de Grade Metálica
+  gates.forEach(gt => {
+    const visibleH = gt.h - gt.openProgress;
+    if (visibleH > 4) {
+      ctx.fillStyle = '#1b2630';
+      ctx.fillRect(gt.x, gt.y, gt.w, visibleH);
+      ctx.strokeStyle = '#6c8296';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(gt.x, gt.y, gt.w, visibleH);
+      // Barras horizontais da grade
+      for (let by = gt.y + 14; by < gt.y + visibleH; by += 18) {
+        ctx.fillStyle = '#4f6375';
+        ctx.fillRect(gt.x + 2, by, gt.w - 4, 4);
+      }
     }
   });
 
-  // Inimigos
-  enemies.forEach(e => {
-    if (e.hp > 0) {
-      ctx.fillStyle = '#b42318';
-      ctx.fillRect(e.x, e.y, e.w, e.h);
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 9px sans-serif';
-      ctx.fillText(e.type, e.x - 4, e.y - 6);
-    }
+  // 7. Placas de Pressão e Blocos de Pedra Empurráveis
+  plates.forEach(pl => {
+    ctx.fillStyle = pl.pressed ? '#2ecc71' : '#f5b932';
+    ctx.fillRect(pl.x, pl.y + (pl.pressed ? 4 : 0), pl.w, pl.h);
   });
 
-  // Portal Final
-  ctx.fillStyle = '#ffc928';
-  ctx.fillRect(worldW - 70, groundY - 90, 50, 90);
-  ctx.fillStyle = '#35134c';
-  ctx.font = 'bold 16px sans-serif';
-  ctx.fillText('🚪 FASE', worldW - 68, groundY - 45);
+  pushBlocks.forEach(b => {
+    drawSlateBlockStructure(b.x, b.y, b.w, b.h, false);
+    ctx.strokeStyle = '#f5b932';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(b.x + 4, b.y + 4, b.w - 8, b.h - 8);
+    ctx.fillStyle = '#f5b932';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('EMPURRE', b.x + b.w / 2, b.y - 6);
+  });
 
-  // Personagem Pixel Art
-  ctx.fillStyle = hero.color;
-  ctx.fillRect(player.x, player.y, player.w, player.h);
-  ctx.fillStyle = '#fff';
-  ctx.font = '16px sans-serif';
-  ctx.fillText(hero.emoji, player.x + 4, player.y + 30);
-
-  // Animação de Ataque (Chicote)
-  if (player.attackTimer > 0) {
-    ctx.strokeStyle = '#ffc928';
+  // 8. Alavancas
+  levers.forEach(lev => {
+    ctx.fillStyle = '#3d4c5c';
+    ctx.fillRect(lev.x - 10, lev.y + 16, 20, 10);
+    ctx.strokeStyle = '#d4a24c';
     ctx.lineWidth = 4;
     ctx.beginPath();
-    const whipX = player.facing === 1 ? player.x + player.w : player.x - 45;
-    ctx.rect(whipX, player.y + 10, 45, 30);
+    ctx.moveTo(lev.x, lev.y + 20);
+    ctx.lineTo(lev.x + (lev.active ? 14 : -14), lev.y);
+    ctx.stroke();
+    ctx.fillStyle = lev.active ? '#2ecc71' : '#e74c3c';
+    ctx.beginPath();
+    ctx.arc(lev.x + (lev.active ? 14 : -14), lev.y, 6, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // 9. Lâminas Cortantes (Slicers), Espinhos e Veneno
+  slicers.forEach(sl => {
+    ctx.fillStyle = '#1b232b';
+    ctx.fillRect(sl.x - 14, sl.y - 6, 28, 8);
+    ctx.fillStyle = '#d0d7de';
+    ctx.beginPath();
+    ctx.moveTo(sl.x - 11, sl.y);
+    ctx.lineTo(sl.x + 11, sl.y);
+    ctx.lineTo(sl.x, sl.y + sl.currH);
+    ctx.closePath();
+    ctx.fill();
+  });
+
+  spikes.forEach(sp => {
+    for (let sx = sp.x; sx < sp.x + sp.w; sx += 14) {
+      ctx.fillStyle = '#c4cdd5';
+      ctx.beginPath();
+      ctx.moveTo(sx, sp.y + sp.h);
+      ctx.lineTo(sx + 7, sp.y);
+      ctx.lineTo(sx + 14, sp.y + sp.h);
+      ctx.fill();
+    }
+  });
+
+  poisonPools.forEach(po => {
+    ctx.fillStyle = '#6c1d82';
+    ctx.fillRect(po.x, po.y, po.w, 10);
+    ctx.fillStyle = '#52ff00';
+    for (let i = 0; i < po.w; i += 16) {
+      ctx.fillRect(po.x + i + 3, po.y - 2 + Math.sin(player.animTick * 0.15 + i) * 2, 7, 4);
+    }
+  });
+
+  // 10. Vasos Persas, Powerups e Grimórios do Saber (?)
+  vases.forEach(v => {
+    if (v.broken) return;
+    ctx.fillStyle = '#c9592c';
+    ctx.beginPath();
+    ctx.ellipse(v.x, v.y + 12, 11, 14, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#f5b932';
+    ctx.fillRect(v.x - 7, v.y - 2, 14, 5);
+    ctx.fillRect(v.x - 10, v.y + 9, 20, 4);
+  });
+
+  powerups.forEach(p => {
+    ctx.font = '22px sans-serif';
+    ctx.textAlign = 'center';
+    const icon = p.type === 'dog' ? '🐾' : (p.type === 'star' ? '⭐' : (p.type === 'sand' ? '⏳' : '❤️'));
+    ctx.fillText(icon, p.x, p.y + 14);
+  });
+
+  grimoires.forEach((g, idx) => {
+    if (g.got) return;
+    const gy = g.y + Math.sin(player.animTick * 0.12 + idx) * 4;
+    ctx.fillStyle = '#f5b932';
+    ctx.fillRect(g.x, gy, 34, 34);
+    ctx.strokeStyle = '#4a2166';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(g.x, gy, 34, 34);
+    ctx.fillStyle = '#231130';
+    ctx.font = '900 22px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('?', g.x + 17, gy + 25);
+  });
+
+  // 11. Guardas Sombrios
+  enemies.forEach(e => {
+    if (e.hp <= 0) return;
+    ctx.fillStyle = '#3a1738';
+    ctx.fillRect(e.x + 4, e.y + 10, e.w - 8, e.h - 10);
+    // Turbante e olhos brilhantes
+    ctx.fillStyle = '#9e1b24';
+    ctx.fillRect(e.x + 2, e.y, e.w - 4, 11);
+    ctx.fillStyle = '#ffeb3b';
+    ctx.fillRect(e.x + 7, e.y + 13, 5, 4);
+    ctx.fillRect(e.x + 19, e.y + 13, 5, 4);
+    // Barra de vida
+    ctx.fillStyle = '#111';
+    ctx.fillRect(e.x, e.y - 9, e.w, 4);
+    ctx.fillStyle = '#2ecc71';
+    ctx.fillRect(e.x, e.y - 9, (e.hp / e.maxHp) * e.w, 4);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(e.name, e.x + e.w / 2, e.y - 13);
+  });
+
+  // 12. Portal Persa Final da Fase
+  ctx.fillStyle = exitPortal.open ? '#1b4d3e' : '#26323d';
+  ctx.beginPath();
+  ctx.arc(exitPortal.x + exitPortal.w / 2, exitPortal.y + 30, exitPortal.w / 2, Math.PI, 0);
+  ctx.lineTo(exitPortal.x + exitPortal.w, exitPortal.y + exitPortal.h);
+  ctx.lineTo(exitPortal.x, exitPortal.y + exitPortal.h);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#f5b932';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  ctx.fillStyle = '#f5b932';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(exitPortal.open ? 'AVANÇAR ▶' : '3 GRIMÓRIOS', exitPortal.x + exitPortal.w / 2, exitPortal.y + 56);
+
+  // Placas de Dica nas salas
+  ctx.fillStyle = 'rgba(13, 31, 48, 0.82)';
+  ctx.fillRect(195, 290, 150, 22);
+  ctx.fillStyle = '#f5b932';
+  ctx.font = 'bold 10px sans-serif';
+  ctx.fillText('⬆️ Pule nas paredes p/ subir!', 270, 305);
+
+  // 13. Herói Prince of Persia + Golpe de Cimitarra de Luz + Adaga Mágica
+  if (player.invuln % 4 < 2) {
+    drawPrinceHero(ctx, player.x, player.y, selectedHero, player.facing, player.animTick, player.wallSlide, player.mounted, player.starTimer > 0);
+  }
+
+  if (player.actionTimer > 0) {
+    const sx = player.facing === 1 ? player.x + player.w : player.x - 48;
+    ctx.strokeStyle = '#f5b932';
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.arc(sx + (player.facing === 1 ? 10 : 38), player.y + 24, 26, -0.8, 0.8, player.facing === -1);
     ctx.stroke();
   }
 
-  // Textos Flutuantes
-  floatingTexts.forEach(ft => {
-    ctx.fillStyle = ft.color;
-    ctx.font = 'bold 12px sans-serif';
-    ctx.fillText(ft.text, ft.x, ft.y);
+  projectiles.forEach(p => {
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate(p.ticks * 0.35);
+    ctx.fillStyle = '#7fd4ff';
+    ctx.fillRect(-12, -3, 24, 6);
+    ctx.fillRect(-3, -12, 6, 24);
+    ctx.restore();
+  });
+
+  // 14. Partículas Flutuantes
+  particles.forEach(pt => {
+    ctx.fillStyle = pt.color;
+    ctx.font = '900 13px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(pt.txt, pt.x, pt.y);
   });
 
   ctx.restore();
+
+  // 15. MEDALHÃO ORNAMENTAL DO CANTO DIREITO (Idêntico à interface da imagem!)
+  drawPersianCornerHUD();
 }
 
-function gameLoop() {
-  if (!$('play').classList.contains('hidden')) {
-    updateGame();
-    drawGame();
+// Desenha os blocos de pedra azul-ardósia com relevo e friso ornamental iguais à foto
+function drawSlateBlockStructure(x, y, w, h, hasTopLedge) {
+  ctx.fillStyle = '#2d3b47';
+  ctx.fillRect(x, y, w, h);
+
+  const bw = 32, bh = 18;
+  for (let py = y; py < y + h; py += bh) {
+    const rowIdx = Math.floor((py - y) / bh);
+    const offset = (rowIdx % 2) * 16;
+    for (let px = x - offset; px < x + w; px += bw) {
+      const drawX = Math.max(x, px);
+      const drawW = Math.min(x + w, px + bw) - drawX;
+      const drawH = Math.min(y + h - py, bh);
+      if (drawW <= 2 || drawH <= 2) continue;
+
+      ctx.fillStyle = ((rowIdx + Math.floor(px / bw)) % 2 === 0) ? '#3a4b59' : '#2c3945';
+      ctx.fillRect(drawX + 1, py + 1, drawW - 2, drawH - 2);
+      // Borda iluminada superior
+      ctx.fillStyle = '#52687a';
+      ctx.fillRect(drawX + 1, py + 1, drawW - 2, 2);
+      // Junta escura
+      ctx.fillStyle = '#182026';
+      ctx.fillRect(drawX, py + drawH - 1, drawW, 1);
+    }
   }
-  requestAnimationFrame(gameLoop);
+
+  // Laje superior chanfrada (como nas plataformas da imagem)
+  if (hasTopLedge) {
+    ctx.fillStyle = '#586f82';
+    ctx.fillRect(x, y, w, 6);
+    ctx.fillStyle = '#7a94ab';
+    ctx.fillRect(x, y, w, 2);
+    ctx.fillStyle = '#1d2730';
+    ctx.fillRect(x, y + 6, w, 3);
+  }
 }
 
-// QUIZ RPG
-function openQuiz(qIdx) {
-  currentQuizIdx = qIdx;
-  quizAttempts = 0;
-  quizDone = false;
-  const q = levels[levelIndex].questions[qIdx];
-  $('quiz-phase').textContent = `Fase ${levelIndex + 1}/4 · Grimório do Saber`;
-  $('quiz-pillar').textContent = q.pillar;
-  $('quiz-knowledge').textContent = q.knowledge;
-  $('quiz-question').textContent = q.q;
-  $('quiz-feedback').className = 'feedback hidden';
-  $('quiz-next').classList.add('hidden');
-
-  const box = $('quiz-options');
-  box.replaceChildren();
-  q.options.forEach((opt, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'option';
-    btn.textContent = opt;
-    btn.onclick = () => answerQuiz(i, btn, q);
-    box.appendChild(btn);
+// Desenha as heras e folhas verdes penduradas nos blocos de pedra azul
+function drawLushIvy(x, y, w, h) {
+  const leaves = [
+    { dx: 8, dy: 4, r: 9 }, { dx: 20, dy: 8, r: 11 }, { dx: 34, dy: 6, r: 10 },
+    { dx: 14, dy: 18, r: 10 }, { dx: 26, dy: 22, r: 9 }, { dx: 18, dy: 34, r: 8 },
+    { dx: 22, dy: 44, r: 6 }, { dx: 46, dy: 12, r: 9 }
+  ];
+  leaves.forEach((lf, i) => {
+    ctx.fillStyle = i % 2 === 0 ? '#244a22' : '#386e34';
+    ctx.beginPath();
+    ctx.arc(x + lf.dx, y + lf.dy, lf.r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#53964d';
+    ctx.beginPath();
+    ctx.arc(x + lf.dx - 2, y + lf.dy - 2, lf.r * 0.55, 0, Math.PI * 2);
+    ctx.fill();
   });
-  show('quiz');
 }
 
-function answerQuiz(i, btn, q) {
-  if (quizDone) return;
+// Medalhão Persa Dourado e Rubi no canto da tela (como na referência)
+function drawPersianCornerHUD() {
+  const cx = canvas.width - 42;
+  const cy = 44;
+  ctx.save();
+  ctx.fillStyle = '#0d2236';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 32, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#f5b932';
+  ctx.stroke();
+
+  ctx.fillStyle = '#9e1b24';
+  ctx.beginPath();
+  ctx.arc(cx, cy, 24, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#f5b932';
+  ctx.font = '900 13px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('30', cx, cy - 2);
+  ctx.font = 'bold 8px sans-serif';
+  ctx.fillText('ANOS', cx, cy + 9);
+  ctx.restore();
+}
+
+function updateHUD() {
+  $('hud-hero').textContent = selectedHero.name.replace('Super ', '');
+  $('hud-stage').textContent = `${stageIdx + 1}/4`;
+  $('hud-lvl').textContent = rpgLvl;
+  $('hud-hp').textContent = hp;
+  $('hud-mp').textContent = mp;
+  $('hud-gates').textContent = `${gates.filter(g => g.open).length}/${gates.length}`;
+  $('hud-books').textContent = `${grimoires.filter(g => g.got).length}/3`;
+  $('hud-score').textContent = score;
+}
+
+// MODAL DE QUIZ EDUCATIVO
+function openQuizModal(qIdx) {
+  keys.left = keys.right = keys.up = keys.down = keys.jump = false;
+  quizAttempts = 0;
+  quizCompleted = false;
+  const st = STAGES[stageIdx];
+  const q = st.questions[qIdx];
+
+  $('q-phase').textContent = `Fase ${stageIdx + 1}/4 • ${st.title}`;
+  $('q-pillar').textContent = q.pillar;
+  $('q-text').textContent = q.text;
+  $('q-question').textContent = q.q;
+  $('q-feedback').className = 'feedback-banner hidden';
+  $('btn-q-next').classList.add('hidden');
+
+  const box = $('q-options');
+  box.replaceChildren();
+  q.opts.forEach((optText, i) => {
+    const b = document.createElement('button');
+    b.className = 'quiz-opt';
+    b.textContent = optText;
+    b.onclick = () => handleQuizAnswer(i, b, q);
+    box.appendChild(b);
+  });
+
+  showScreen('quiz');
+}
+
+function handleQuizAnswer(i, btn, q) {
+  if (quizCompleted) return;
   quizAttempts++;
-  const feedback = $('quiz-feedback');
-  if (i === q.correct) {
-    quizDone = true;
+  const fb = $('q-feedback');
+
+  if (i === q.ans) {
+    quizCompleted = true;
     const pts = quizAttempts === 1 ? 150 : 80;
     score += pts;
-    if (quizAttempts === 1) firstTry++;
+    gainXP(60);
+    if (quizAttempts === 1) firstTryCount++;
+
     btn.classList.add('correct');
-    feedback.className = 'feedback good';
-    feedback.textContent = `Acertou! +${pts} pontos.`;
-    [...$('quiz-options').children].forEach(b => b.disabled = true);
-    $('quiz-next').classList.remove('hidden');
+    fb.className = 'feedback-banner good';
+    fb.textContent = `✅ Excelente! +${pts} Pontos e +60 XP!`;
+    [...$('q-options').children].forEach(el => el.disabled = true);
+    $('btn-q-next').classList.remove('hidden');
     updateHUD();
   } else {
     btn.classList.add('wrong');
     btn.disabled = true;
-    feedback.className = 'feedback bad';
-    feedback.textContent = 'Incorreto. Tente outra alternativa.';
+    fb.className = 'feedback-banner bad';
+    fb.textContent = '⚠️ Releia a orientação da cartilha acima e tente outra alternativa!';
   }
 }
 
-$('quiz-next').onclick = () => show('play');
+$('btn-q-next').onclick = () => showScreen('play');
 
 // RANKING LOCALSTORAGE
-function getRanking() {
-  try { return JSON.parse(localStorage.getItem('comunita-ranking-v3') || '[]'); } catch { return []; }
+function getRankList() {
+  try { return JSON.parse(localStorage.getItem('comunita_persia_rank_v2') || '[]'); } catch { return []; }
 }
-function saveRanking(entry) {
-  const list = [...getRanking(), entry].sort((a, b) => b.score - a.score).slice(0, 10);
-  try { localStorage.setItem('comunita-ranking-v3', JSON.stringify(list)); } catch {}
-  return list;
+
+function saveRankEntry(entry) {
+  const list = [...getRankList(), entry].sort((a, b) => b.score - a.score).slice(0, 10);
+  try { localStorage.setItem('comunita_persia_rank_v2', JSON.stringify(list)); } catch {}
 }
-function renderRanking(el) {
-  el.replaceChildren();
-  const list = getRanking();
-  if (!list.length) { el.innerHTML = '<div class="empty">Nenhum recorde salvo ainda.</div>'; return; }
-  const table = document.createElement('table');
-  table.className = 'ranking';
-  table.innerHTML = '<thead><tr><th>#</th><th>Agente</th><th>Unidade</th><th>Pts</th></tr></thead>';
-  const tbody = document.createElement('tbody');
-  list.forEach((e, i) => {
+
+function renderRankTable(container) {
+  container.replaceChildren();
+  const list = getRankList();
+  if (!list.length) {
+    container.innerHTML = '<p class="sub" style="margin:12px 0;">Nenhum recorde registrado ainda. Seja o primeiro Guardião!</p>';
+    return;
+  }
+  const tbl = document.createElement('table');
+  tbl.className = 'ranking';
+  tbl.innerHTML = '<thead><tr><th>#</th><th>Colaborador</th><th>Unidade</th><th>Herói</th><th>Score</th></tr></thead>';
+  const tb = document.createElement('tbody');
+  list.forEach((r, idx) => {
     const tr = document.createElement('tr');
-    [String(i + 1), e.name, e.unit || '—', String(e.score)].forEach(v => {
-      const td = document.createElement('td'); td.textContent = v; tr.appendChild(td);
+    [String(idx + 1), r.name, r.unit, r.hero, String(r.score)].forEach(val => {
+      const td = document.createElement('td');
+      td.textContent = val;
+      tr.appendChild(td);
     });
-    tbody.appendChild(tr);
+    tb.appendChild(tr);
   });
-  table.appendChild(tbody);
-  el.appendChild(table);
+  tbl.appendChild(tb);
+  container.appendChild(tbl);
 }
 
-function finishGame() {
-  clearInterval(clock);
-  const entry = { name: playerName, unit: playerUnit, hero: hero.name, score, time: formatTime(seconds) };
-  saveRanking(entry);
-  $('result-summary').textContent = `${playerName}, você concluiu a jornada de 30 Anos da Rede Comunitá!`;
-  $('result-score').textContent = score;
-  $('result-correct').textContent = `${firstTry}/12`;
-  $('result-time').textContent = formatTime(seconds);
-  renderRanking($('result-ranking'));
-  show('results');
+function formatClock(sec) {
+  return `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(sec % 60).padStart(2, '0')}`;
 }
 
-function formatTime(s) {
-  return `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+function finishAdventure() {
+  clearInterval(timerId);
+  const speedBonus = Math.max(0, 320 - elapsedSec) * 2;
+  score += speedBonus;
+  saveRankEntry({ name: playerName, unit: playerUnit, hero: selectedHero.name, score, time: formatClock(elapsedSec) });
+
+  $('res-summary').textContent = `Parabéns, ${playerName} (${playerUnit})! Você superou todos os desafios acrobáticos e puzzles do templo com ${selectedHero.name} (Bônus de Tempo: +${speedBonus} pts).`;
+  $('res-score').textContent = score;
+  $('res-first').textContent = `${firstTryCount}/12`;
+  $('res-time').textContent = formatClock(elapsedSec);
+  renderRankTable($('res-ranking-box'));
+  showScreen('results');
 }
 
-// SELEÇÃO DE HERÓIS NA TELA DE SETUP
-function renderHeroChoices() {
-  const el = $('hero-choices');
-  el.replaceChildren();
-  heroes.forEach(h => {
-    const b = document.createElement('div');
-    b.className = 'hero-choice';
-    b.setAttribute('aria-pressed', String(h.id === hero.id));
-    b.innerHTML = `<div class="avatar">${h.emoji}</div><b>${h.name}</b><small>${h.role}</small>`;
-    b.onclick = () => { hero = h; renderHeroChoices(); };
-    el.appendChild(b);
+// PREVIEW DOS HERÓIS NOS CARDS
+function initHeroCards() {
+  const box = $('heroes-list');
+  box.replaceChildren();
+  HEROES.forEach(h => {
+    const card = document.createElement('div');
+    card.className = 'hero-card' + (h.id === selectedHero.id ? ' active' : '');
+    const miniCanvas = document.createElement('canvas');
+    miniCanvas.width = 44;
+    miniCanvas.height = 50;
+    drawPrinceHero(miniCanvas.getContext('2d'), 7, 1, h, 1, 0, 0, false, false);
+
+    const title = document.createElement('b');
+    title.textContent = h.name;
+    const sub = document.createElement('small');
+    sub.textContent = h.role;
+
+    card.append(miniCanvas, title, sub);
+    card.onclick = () => { selectedHero = h; initHeroCards(); };
+    box.appendChild(card);
   });
 }
 
-// BOTÕES DE NAVEGAÇÃO E EVENTOS
-$('go-setup').onclick = () => show('setup');
-$('back-home').onclick = () => show('home');
-$('ranking-back').onclick = () => show('home');
-$('result-home').onclick = () => show('home');
-$('show-ranking').onclick = () => { renderRanking($('ranking-content')); show('ranking-screen'); };
+// EVENTOS DE NAVEGAÇÃO
+$('btn-go-setup').onclick = () => showScreen('setup');
+$('btn-setup-back').onclick = () => showScreen('home');
+$('btn-go-ranking').onclick = () => { renderRankTable($('standalone-ranking-box')); showScreen('ranking-screen'); };
+$('btn-rank-back').onclick = () => showScreen('home');
+$('btn-rank-clear').onclick = () => { localStorage.removeItem('comunita_persia_rank_v2'); renderRankTable($('standalone-ranking-box')); };
 
-$('start-game').onclick = () => {
-  playerName = $('player-name').value.trim() || 'Agente Comunitá';
-  playerUnit = $('player-unit').value.trim() || 'Sede';
-  score = 0; hp = 100; mp = 50; xp = 0; levelRpg = 1; levelIndex = 0; firstTry = 0; seconds = 0;
-  buildLevel();
-  updateHUD();
-  show('play');
-  clearInterval(clock);
-  clock = setInterval(() => { if (!$('play').classList.contains('hidden')) seconds++; }, 1000);
+$('btn-start-play').onclick = () => {
+  playerName = $('inp-name').value.trim() || 'Guardião Comunitá';
+  playerUnit = $('inp-unit').value.trim() || 'Rede Comunitá';
+  stageIdx = 0; score = 0; hp = 100; mp = 50; xp = 0; rpgLvl = 1; firstTryCount = 0; elapsedSec = 0;
+  player.mounted = false;
+  buildStage();
+  showScreen('play');
+  clearInterval(timerId);
+  timerId = setInterval(() => {
+    if (!$('play').classList.contains('hidden')) elapsedSec++;
+  }, 1000);
 };
 
-$('quit-game').onclick = () => { if (confirm('Sair da partida?')) { clearInterval(clock); show('home'); } };
-$('play-again').onclick = () => show('setup');
-$('clear-ranking').onclick = () => { localStorage.removeItem('comunita-ranking-v3'); renderRanking($('ranking-content')); };
+$('btn-reset-room').onclick = () => {
+  player.x = 55; player.y = 370; player.vx = 0; player.vy = 0;
+  pushBlocks[0].x = 730;
+};
+$('btn-quit').onclick = () => { clearInterval(timerId); showScreen('home'); };
+$('gb-start').onclick = () => { clearInterval(timerId); showScreen('home'); };
+$('gb-select').onclick = () => { renderRankTable($('standalone-ranking-box')); showScreen('ranking-screen'); };
+$('btn-play-again').onclick = () => showScreen('setup');
+$('btn-res-home').onclick = () => showScreen('home');
 
-$('copy-score').onclick = async () => {
-  const txt = `🏆 MISSÃO COMUNITÁ 30 ANOS\nAgente: ${playerName} (${playerUnit})\nPontos: ${score}\nTempo: ${formatTime(seconds)}`;
-  try { await navigator.clipboard.writeText(txt); $('copy-status').textContent = 'Copiado para o clipboard!'; } catch { $('copy-status').textContent = txt; }
+$('btn-copy-score').onclick = async () => {
+  const txt = `🗡️ *MISSÃO COMUNITÁ 30 ANOS (PRINCE OF PERSIA)*\n👤 Colaborador: ${playerName} (${playerUnit})\n🦸 Herói: ${selectedHero.name}\n⭐ Score: ${score} pts | Acertos de 1ª: ${firstTryCount}/12\n⏱️ Tempo: ${formatClock(elapsedSec)}\nVenha superar meu recorde no Templo do Saber!`;
+  try {
+    await navigator.clipboard.writeText(txt);
+    $('copy-msg').textContent = '✅ Placar copiado para colar no WhatsApp!';
+  } catch {
+    $('copy-msg').textContent = txt;
+  }
 };
 
-// CONTROLES DE TECLADO E TÁTEIS
+// CONTROLES DE TECLADO E GAME BOY OVERLAY
 window.addEventListener('keydown', e => {
-  if (['ArrowLeft','ArrowRight','ArrowUp','Space','KeyA','KeyD','KeyW','KeyJ','KeyK'].includes(e.code)) e.preventDefault();
+  if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space','KeyA','KeyD','KeyW','KeyS','KeyJ','KeyK','KeyE','KeyZ','KeyX'].includes(e.code) && !$('play').classList.contains('hidden')) {
+    e.preventDefault();
+  }
   if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
   if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
-  if (e.code === 'ArrowUp' || e.code === 'Space' || e.code === 'KeyW') keys.jump = true;
-  if (e.code === 'KeyJ') keys.attack = true;
-  if (e.code === 'KeyK') keys.magic = true;
+  if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') { keys.up = true; keys.jump = true; }
+  if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.down = true;
+  if (e.code === 'KeyJ' || e.code === 'KeyZ' || e.code === 'KeyE') keys.action = true;
+  if (e.code === 'KeyK' || e.code === 'KeyX') keys.magic = true;
 });
 
 window.addEventListener('keyup', e => {
   if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
   if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
-  if (e.code === 'ArrowUp' || e.code === 'Space' || e.code === 'KeyW') keys.jump = false;
-  if (e.code === 'KeyJ') keys.attack = false;
-  if (e.code === 'KeyK') keys.magic = false;
+  if (e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'Space') { keys.up = false; keys.jump = false; }
+  if (e.code === 'ArrowDown' || e.code === 'KeyS') keys.down = false;
+  if (e.code === 'KeyJ' || e.code === 'KeyZ' || e.code === 'KeyE') keys.action = false;
+  if (e.code === 'KeyK' || e.code === 'KeyX') keys.magic = false;
 });
 
-function bindTouch(id, key) {
+function bindGBButton(id, keyProp, alsoJump = false) {
   const el = $(id);
   if (!el) return;
-  const start = e => { e.preventDefault(); keys[key] = true; };
-  const end = e => { e.preventDefault(); keys[key] = false; };
-  el.addEventListener('pointerdown', start);
-  el.addEventListener('pointerup', end);
-  el.addEventListener('pointerleave', end);
+  const on = e => { e.preventDefault(); keys[keyProp] = true; if (alsoJump) keys.jump = true; };
+  const off = e => { e.preventDefault(); keys[keyProp] = false; if (alsoJump) keys.jump = false; };
+  el.addEventListener('pointerdown', on);
+  el.addEventListener('pointerup', off);
+  el.addEventListener('pointerleave', off);
+  el.addEventListener('pointercancel', off);
 }
 
-bindTouch('left-touch', 'left');
-bindTouch('right-touch', 'right');
-bindTouch('jump-touch', 'jump');
-bindTouch('attack-touch', 'attack');
-bindTouch('magic-touch', 'magic');
+bindGBButton('gb-left', 'left');
+bindGBButton('gb-right', 'right');
+bindGBButton('gb-up', 'up', true);
+bindGBButton('gb-down', 'down');
+bindGBButton('gb-a', 'jump');
+bindGBButton('gb-b', 'action');
+bindGBButton('gb-x', 'magic');
 
-renderHeroChoices();
-requestAnimationFrame(gameLoop);
+function mainLoop() {
+  if (!$('play').classList.contains('hidden')) {
+    updatePhysics();
+    renderScene();
+  }
+  requestAnimationFrame(mainLoop);
+}
+
+initHeroCards();
+buildStage();
+requestAnimationFrame(mainLoop);
 </script>
 </body>
 </html>
